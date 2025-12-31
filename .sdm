@@ -1,0 +1,3 @@
+gorm/sdm/go.dal
+no_orm/sdm/go.dal
+sqlx/sdm/go.dal
