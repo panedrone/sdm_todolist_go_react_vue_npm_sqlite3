@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"log"
 	"sdm_demo_todolist/no_orm/dbal"
 	"sdm_demo_todolist/no_orm/handlers"
 	"sdm_demo_todolist/shared"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {

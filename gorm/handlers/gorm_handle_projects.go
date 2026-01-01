@@ -2,14 +2,15 @@ package handlers
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 	"sdm_demo_todolist/gorm/dbal"
 	m "sdm_demo_todolist/gorm/dbal/models"
 	"sdm_demo_todolist/shared"
 	"sdm_demo_todolist/shared/request"
 	"sdm_demo_todolist/shared/resp"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type projectHandlers struct {

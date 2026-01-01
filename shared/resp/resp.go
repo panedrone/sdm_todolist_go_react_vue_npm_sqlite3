@@ -2,8 +2,9 @@ package resp
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type ErrorResponse struct {

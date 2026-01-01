@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"log"
 	"os"
 	"runtime"
@@ -10,6 +9,8 @@ import (
 	"sdm_demo_todolist/sqlx/dbal"
 	"sdm_demo_todolist/sqlx/handlers"
 	"sdm_demo_todolist/sqlx/swagger"
+
+	"github.com/gin-gonic/gin"
 )
 
 // @schemes	http

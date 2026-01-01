@@ -6,13 +6,14 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"github.com/jmoiron/sqlx"
-	"github.com/jmoiron/sqlx/reflectx"
 	"io"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/jmoiron/sqlx"
+	"github.com/jmoiron/sqlx/reflectx"
 )
 
 /*

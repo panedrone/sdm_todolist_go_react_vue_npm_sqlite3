@@ -2,10 +2,11 @@ package dbal
 
 import (
 	"context"
-	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
 	"os"
 	"testing"
+
+	"github.com/jmoiron/sqlx"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var ctx context.Context

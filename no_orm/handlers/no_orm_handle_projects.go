@@ -3,13 +3,14 @@ package handlers
 import (
 	"database/sql"
 	"errors"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"sdm_demo_todolist/no_orm/dbal"
 	"sdm_demo_todolist/no_orm/dbal/dto"
 	"sdm_demo_todolist/shared"
 	"sdm_demo_todolist/shared/request"
 	"sdm_demo_todolist/shared/resp"
+
+	"github.com/gin-gonic/gin"
 )
 
 type projectHandlers struct {

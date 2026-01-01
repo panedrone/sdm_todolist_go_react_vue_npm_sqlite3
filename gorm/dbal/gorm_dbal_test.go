@@ -2,11 +2,12 @@ package dbal
 
 import (
 	"context"
+	"os"
+	"testing"
+
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"os"
-	"testing"
 )
 
 var ctx context.Context

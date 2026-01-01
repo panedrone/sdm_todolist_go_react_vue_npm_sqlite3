@@ -1,8 +1,9 @@
 package request
 
 import (
-	"github.com/gin-gonic/gin"
 	"sdm_demo_todolist/shared/resp"
+
+	"github.com/gin-gonic/gin"
 )
 
 //func BindUri(ctx *gin.Context, uri interface{}) error {

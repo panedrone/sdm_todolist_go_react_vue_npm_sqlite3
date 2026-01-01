@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"sdm_demo_todolist/no_orm/dbal"
 	"sdm_demo_todolist/no_orm/dbal/dto"
@@ -12,6 +11,8 @@ import (
 	"sdm_demo_todolist/shared/datetime"
 	"sdm_demo_todolist/shared/request"
 	"sdm_demo_todolist/shared/resp"
+
+	"github.com/gin-gonic/gin"
 )
 
 type taskHandlers struct {

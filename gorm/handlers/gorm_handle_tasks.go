@@ -3,8 +3,6 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 	"sdm_demo_todolist/gorm/dbal"
 	"sdm_demo_todolist/gorm/dbal/models"
@@ -12,6 +10,9 @@ import (
 	"sdm_demo_todolist/shared/datetime"
 	"sdm_demo_todolist/shared/request"
 	"sdm_demo_todolist/shared/resp"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type taskHandlers struct {

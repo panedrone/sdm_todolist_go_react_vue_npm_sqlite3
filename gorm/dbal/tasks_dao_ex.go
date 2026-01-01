@@ -2,8 +2,9 @@ package dbal
 
 import (
 	"context"
-	"gorm.io/gorm"
 	"sdm_demo_todolist/gorm/dbal/models"
+
+	"gorm.io/gorm"
 )
 
 // Hand coded additions
