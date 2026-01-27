@@ -2,16 +2,23 @@ version: '3'
 
 services:
   sdm-todo-app:
-    network_mode: "bridge"
     build:
       context: .
       dockerfile: Dockerfile
     image: sdm-todo-app
     container_name:  sdm-todo-app
-    privileged: true
+#    privileged: true
     restart: always
-    ports:
-      - '3101:8080'
+#    ports:
+#      - '3101:8080'
+    environment:
+      # Listen address for Go app. Use localhost to avoid external exposure.
+      APP_LISTEN: "127.0.0.1:3301"
+      AUTH_TYPE: none
+      RUN_ENV: docker
+    #    network_mode: "bridge"
+    network_mode: host  # allows direct access to localhost loopback
+
     volumes:
       - ./front-react:/apps/front-react
       - ./db:/apps/db

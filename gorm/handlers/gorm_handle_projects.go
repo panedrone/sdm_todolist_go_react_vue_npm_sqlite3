@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"sdm_demo_todolist/gorm/dbal"
 	m "sdm_demo_todolist/gorm/dbal/models"
-	"sdm_demo_todolist/shared"
-	"sdm_demo_todolist/shared/request"
-	"sdm_demo_todolist/shared/resp"
+	"sdm_demo_todolist/pkg"
+	"sdm_demo_todolist/pkg/request"
+	"sdm_demo_todolist/pkg/resp"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -17,7 +17,7 @@ type projectHandlers struct {
 	dao *dbal.ProjectsDao
 }
 
-func NewProjectHandlers() shared.ProjectHandlers {
+func NewProjectHandlers() etc.ProjectHandlers {
 	return &projectHandlers{
 		dao: dbal.NewProjectsDao(),
 	}

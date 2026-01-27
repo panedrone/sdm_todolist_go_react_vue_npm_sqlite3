@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"runtime"
-	"sdm_demo_todolist/shared"
+	"sdm_demo_todolist/pkg"
 	"sdm_demo_todolist/sqlx/dbal"
 	"sdm_demo_todolist/sqlx/handlers"
 	"sdm_demo_todolist/sqlx/swagger"
@@ -48,7 +47,7 @@ func main() {
 	// whoIam := fmt.Sprintf(`%v, %v,%v sqlx, sqlite3, <a target="_blank" href="swagger/index.html">swagger</a>`, myOS, myArch, inContainer)
 	whoIam := fmt.Sprintf(`%v, %v,%v sqlx, sqlite3`, myOS, myArch, inContainer)
 
-	shared.AssignHandlers(myRouter, whoIam, handlers.NewProjectHandlers(), handlers.NewTaskHandlers())
+	etc.AssignHandlers(myRouter, whoIam, handlers.NewProjectHandlers(), handlers.NewTaskHandlers())
 
-	log.Fatal(myRouter.Run(":8080"))
+	etc.Listen(myRouter)
 }

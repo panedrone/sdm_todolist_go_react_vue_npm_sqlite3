@@ -1,7 +1,9 @@
-package shared
+package etc
 
 import (
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -67,4 +69,17 @@ func AssignHandlers(
 	groupTask.GET("", taskHandlers.TaskRead)
 	groupTask.PUT("", taskHandlers.TaskUpdate)
 	groupTask.DELETE("", taskHandlers.TaskDelete)
+}
+
+func Listen(myRouter *gin.Engine) {
+	getAppListen := func() string {
+		listen := os.Getenv("APP_LISTEN")
+		if listen == "" {
+			// fallback: bind explicitly to localhost with default port
+			listen = "127.0.0.1:3301"
+		}
+		return listen
+	}
+
+	log.Fatal(myRouter.Run(getAppListen()))
 }

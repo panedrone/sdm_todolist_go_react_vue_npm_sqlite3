@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"sdm_demo_todolist/gorm/dbal"
 	"sdm_demo_todolist/gorm/dbal/models"
-	"sdm_demo_todolist/shared"
-	"sdm_demo_todolist/shared/datetime"
-	"sdm_demo_todolist/shared/request"
-	"sdm_demo_todolist/shared/resp"
+	"sdm_demo_todolist/pkg"
+	"sdm_demo_todolist/pkg/datetime"
+	"sdm_demo_todolist/pkg/request"
+	"sdm_demo_todolist/pkg/resp"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -19,7 +19,7 @@ type taskHandlers struct {
 	dao *dbal.TasksDao
 }
 
-func NewTaskHandlers() shared.TaskHandlers {
+func NewTaskHandlers() etc.TaskHandlers {
 	return &taskHandlers{
 		dao: dbal.NewTasksDao(),
 	}

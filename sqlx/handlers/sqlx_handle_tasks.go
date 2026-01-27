@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"sdm_demo_todolist/shared"
-	"sdm_demo_todolist/shared/datetime"
-	"sdm_demo_todolist/shared/request"
-	"sdm_demo_todolist/shared/resp"
+	"sdm_demo_todolist/pkg"
+	"sdm_demo_todolist/pkg/datetime"
+	"sdm_demo_todolist/pkg/request"
+	"sdm_demo_todolist/pkg/resp"
 	"sdm_demo_todolist/sqlx/dbal"
 	"sdm_demo_todolist/sqlx/dbal/dto"
 
@@ -19,7 +19,7 @@ type taskHandlers struct {
 	dao *dbal.TasksDao
 }
 
-func NewTaskHandlers() shared.TaskHandlers {
+func NewTaskHandlers() etc.TaskHandlers {
 	return &taskHandlers{
 		dao: dbal.NewTasksDao(),
 	}

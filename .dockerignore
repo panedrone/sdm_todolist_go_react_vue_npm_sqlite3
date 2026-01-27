@@ -1,0 +1,25 @@
+# VCS
+.git
+.gitignore
+.github/
+
+# IDE
+.idea
+.vscode
+
+# Node
+node_modules
+
+# Build artifacts
+dist
+build
+target
+bin
+
+sdm
+lib/
+
+# Logs & temp
+logs/
+*.log
+*.tmp
