@@ -10,7 +10,7 @@ import (
 	// docs package is created by swagger when you swagger init.
 	// === panedrone: !!! import _ "sdm_demo_todolist/sqlx/docs"
 	////////////////////////////////////////////////////////////
-	_ "sdm_demo_todolist/sqlx/docs"
+	_ "sdm_demo_todolist/internal/sqlx/docs"
 )
 
 func Init(myRouter *gin.Engine) {
