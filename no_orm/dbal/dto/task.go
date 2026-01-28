@@ -4,8 +4,8 @@ package dto
 // https://sqldalmaker.sourceforge.net/
 
 type Task struct {
-	TID       int64  `json:"t_id"`
-	PID       int64  `json:"p_id"`
+	TID       int64  `json:"t_id"` // PK
+	PID       int64  `json:"p_id"` // FK ref. column -> Project
 	TPriority int64  `json:"t_priority"`
 	TDate     string `json:"t_date"`
 	TSubject  string `json:"t_subject"`

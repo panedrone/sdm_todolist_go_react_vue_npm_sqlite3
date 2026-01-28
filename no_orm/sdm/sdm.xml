@@ -14,8 +14,8 @@
 
     <dto-class name="Task" ref="tasks">
         <custom>
-            TId // PK
-            PId // FK ref. column -> Project
+            TID // PK
+            PID // FK ref. column -> Project
         </custom>
     </dto-class>
 

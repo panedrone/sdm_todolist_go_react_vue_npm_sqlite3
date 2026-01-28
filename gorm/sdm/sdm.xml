@@ -17,8 +17,8 @@
         <header>// Task can be used in "AutoMigrate"</header>
 
         <custom>
-            TId // PK
-            PId // FK ref. column -> Project
+            TID // PK
+            PID // FK ref. column -> Project
             Project Project `gorm:"foreignKey:PId;references:PId"` // FK -> Project
         </custom>
 
