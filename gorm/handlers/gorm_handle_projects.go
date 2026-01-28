@@ -17,7 +17,7 @@ type projectHandlers struct {
 	dao *dbal.ProjectsDao
 }
 
-func NewProjectHandlers() etc.ProjectHandlers {
+func NewGormProjectHandlers() etc.ProjectHandlers {
 	return &projectHandlers{
 		dao: dbal.NewProjectsDao(),
 	}

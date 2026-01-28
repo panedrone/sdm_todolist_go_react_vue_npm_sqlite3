@@ -19,7 +19,7 @@ type taskHandlers struct {
 	dao *dbal.TasksDao
 }
 
-func NewTaskHandlers() etc.TaskHandlers {
+func NewNoOrmTaskHandlers() etc.TaskHandlers {
 	return &taskHandlers{
 		dao: dbal.NewTasksDao(),
 	}

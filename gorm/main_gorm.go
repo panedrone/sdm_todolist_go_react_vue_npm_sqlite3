@@ -21,8 +21,8 @@ func main() {
 
 	myRouter := gin.New()
 
-	projectHandlers := handlers.NewProjectHandlers()
-	taskHandlers := handlers.NewTaskHandlers()
+	projectHandlers := handlers.NewGormProjectHandlers()
+	taskHandlers := handlers.NewGormTaskHandlers()
 
 	etc.AssignHandlers(myRouter, "Go, Gorm, SQLite3", projectHandlers, taskHandlers)
 

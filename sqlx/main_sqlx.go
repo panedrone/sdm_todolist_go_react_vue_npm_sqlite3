@@ -47,7 +47,7 @@ func main() {
 	// whoIam := fmt.Sprintf(`%v, %v,%v sqlx, sqlite3, <a target="_blank" href="swagger/index.html">swagger</a>`, myOS, myArch, inContainer)
 	whoIam := fmt.Sprintf(`%v, %v,%v sqlx, sqlite3`, myOS, myArch, inContainer)
 
-	etc.AssignHandlers(myRouter, whoIam, handlers.NewProjectHandlers(), handlers.NewTaskHandlers())
+	etc.AssignHandlers(myRouter, whoIam, handlers.NewSqlxProjectHandlers(), handlers.NewSqlxTaskHandlers())
 
 	etc.Listen(myRouter)
 }
