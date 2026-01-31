@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	dbal2 "sdm_demo_todolist/internal/no_orm/dbal"
+	"sdm_demo_todolist/internal/no_orm/dbal"
 	"sdm_demo_todolist/internal/no_orm/dbal/dto"
 	"sdm_demo_todolist/pkg"
 	"sdm_demo_todolist/pkg/datetime"
@@ -16,13 +16,10 @@ import (
 )
 
 type taskHandlers struct {
-	dao *dbal2.TasksDao
 }
 
 func NewNoOrmTaskHandlers() etc.TaskHandlers {
-	return &taskHandlers{
-		dao: dbal2.NewTasksDao(),
-	}
+	return &taskHandlers{}
 }
 
 func (h *taskHandlers) TaskCreate(ctx *gin.Context) {
@@ -40,7 +37,7 @@ func (h *taskHandlers) TaskCreate(ctx *gin.Context) {
 	t.TSubject = inTask.TSubject
 	t.TPriority = 1
 	t.TDate = datetime.NowLocalString()
-	if err := h.dao.CreateTask(ctx, &t); err != nil {
+	if err := dbal.CreateTask(ctx, &t); err != nil {
 		resp.Abort500(ctx, err)
 		return
 	}
@@ -52,7 +49,7 @@ func (h *taskHandlers) TasksReadByProject(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	tasks, err := h.dao.ReadByProject(ctx, uri.PId)
+	tasks, err := dbal.ReadByProject(ctx, uri.PId)
 	if err != nil {
 		resp.Abort500(ctx, err)
 		return
@@ -65,7 +62,7 @@ func (h *taskHandlers) TaskRead(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	task, err := h.dao.ReadTask(ctx, uri.TId)
+	task, err := dbal.ReadTask(ctx, uri.TId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			resp.Abort404NotFound(ctx, err)
@@ -82,7 +79,7 @@ func (h *taskHandlers) TaskUpdate(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	t, err := h.dao.ReadTask(ctx, uri.TId)
+	t, err := dbal.ReadTask(ctx, uri.TId)
 	if err != nil {
 		resp.Abort404NotFound(ctx, err)
 		return
@@ -115,7 +112,7 @@ func (h *taskHandlers) TaskUpdate(ctx *gin.Context) {
 	t.TPriority = req.TPriority
 	t.TDate = req.TDate
 	t.TComments = req.TComments
-	if _, err = h.dao.UpdateTask(ctx, t); err != nil {
+	if _, err = dbal.UpdateTask(ctx, t); err != nil {
 		resp.Abort500(ctx, err)
 		return
 	}
@@ -127,7 +124,7 @@ func (h *taskHandlers) TaskDelete(ctx *gin.Context) {
 		return
 	}
 	t := dto.Task{TID: uri.TId}
-	if _, err := h.dao.DeleteTask(ctx, &t); err != nil {
+	if _, err := dbal.DeleteTask(ctx, &t); err != nil {
 		resp.Abort500(ctx, err)
 		return
 	}

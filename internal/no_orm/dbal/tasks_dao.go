@@ -8,16 +8,13 @@ import (
 	"sdm_demo_todolist/internal/no_orm/dbal/dto"
 )
 
-type TasksDao struct {
-	ds DataStore
-}
-
 // (C)RUD: tasks
 // Generated/AI values are passed to DTO/model.
 
-func (dao *TasksDao) CreateTask(ctx context.Context, item *dto.Task) error {
+var CreateTask = func(ctx context.Context, item *dto.Task) error {
+	ds := DS(ctx)
 	sql := `insert into tasks (p_id, t_priority, t_date, t_subject, t_comments) values (?, ?, ?, ?, ?)`
-	row, err := dao.ds.Insert(ctx, sql, "t_id", item.PID, item.TPriority, item.TDate, item.TSubject, item.TComments)
+	row, err := ds.Insert(ctx, sql, "t_id", item.PID, item.TPriority, item.TDate, item.TSubject, item.TComments)
 	if err == nil {
 		err = SetRes(&item.TID, row)
 	}
@@ -26,7 +23,8 @@ func (dao *TasksDao) CreateTask(ctx context.Context, item *dto.Task) error {
 
 // C(R)UD: tasks
 
-func (dao *TasksDao) ReadTaskList(ctx context.Context) (res []*dto.Task, err error) {
+var ReadTaskList = func(ctx context.Context) (res []*dto.Task, err error) {
+	ds := DS(ctx)
 	sql := `select * from tasks`
 	errMap := make(map[string]int)
 	_onRow := func(row map[string]interface{}) {
@@ -39,7 +37,7 @@ func (dao *TasksDao) ReadTaskList(ctx context.Context) (res []*dto.Task, err err
 		SetString(&item.TComments, row, "t_comments", errMap)
 		res = append(res, &item)
 	}
-	err = dao.ds.QueryAllRows(ctx, sql, _onRow)
+	err = ds.QueryAllRows(ctx, sql, _onRow)
 	if err == nil {
 		err = ErrMapToErr(errMap)
 	}
@@ -48,9 +46,10 @@ func (dao *TasksDao) ReadTaskList(ctx context.Context) (res []*dto.Task, err err
 
 // C(R)UD: tasks
 
-func (dao *TasksDao) ReadTask(ctx context.Context, tID int64) (*dto.Task, error) {
+var ReadTask = func(ctx context.Context, tID int64) (*dto.Task, error) {
+	ds := DS(ctx)
 	sql := `select * from tasks where t_id=?`
-	row, err := dao.ds.QueryRow(ctx, sql, tID)
+	row, err := ds.QueryRow(ctx, sql, tID)
 	if err != nil {
 		return nil, err
 	}
@@ -68,21 +67,24 @@ func (dao *TasksDao) ReadTask(ctx context.Context, tID int64) (*dto.Task, error)
 
 // CR(U)D: tasks
 
-func (dao *TasksDao) UpdateTask(ctx context.Context, item *dto.Task) (rowsAffected int64, err error) {
+var UpdateTask = func(ctx context.Context, item *dto.Task) (rowsAffected int64, err error) {
+	ds := DS(ctx)
 	sql := `update tasks set p_id=?, t_priority=?, t_date=?, t_subject=?, t_comments=? where t_id=?`
-	rowsAffected, err = dao.ds.Exec(ctx, sql, item.PID, item.TPriority, item.TDate, item.TSubject, item.TComments, item.TID)
+	rowsAffected, err = ds.Exec(ctx, sql, item.PID, item.TPriority, item.TDate, item.TSubject, item.TComments, item.TID)
 	return
 }
 
 // CRU(D): tasks
 
-func (dao *TasksDao) DeleteTask(ctx context.Context, item *dto.Task) (rowsAffected int64, err error) {
+var DeleteTask = func(ctx context.Context, item *dto.Task) (rowsAffected int64, err error) {
+	ds := DS(ctx)
 	sql := `delete from tasks where t_id=?`
-	rowsAffected, err = dao.ds.Exec(ctx, sql, item.TID)
+	rowsAffected, err = ds.Exec(ctx, sql, item.TID)
 	return
 }
 
-func (dao *TasksDao) ReadByProject(ctx context.Context, pID int64) (res []*dto.TaskLi, err error) {
+var ReadByProject = func(ctx context.Context, pID int64) (res []*dto.TaskLi, err error) {
+	ds := DS(ctx)
 	sql := `select t_id, t_priority, t_date, t_subject from tasks where p_id =? 
 		order by t_id`
 	errMap := make(map[string]int)
@@ -94,26 +96,29 @@ func (dao *TasksDao) ReadByProject(ctx context.Context, pID int64) (res []*dto.T
 		SetString(&item.TSubject, row, "t_subject", errMap)
 		res = append(res, &item)
 	}
-	err = dao.ds.QueryAllRows(ctx, sql, _onRow, pID)
+	err = ds.QueryAllRows(ctx, sql, _onRow, pID)
 	if err == nil {
 		err = ErrMapToErr(errMap)
 	}
 	return
 }
 
-func (dao *TasksDao) DelByProject(ctx context.Context, pID string) (rowsAffected int64, err error) {
+var DelByProject = func(ctx context.Context, pID string) (rowsAffected int64, err error) {
+	ds := DS(ctx)
 	sql := `delete from tasks where p_id=?`
-	rowsAffected, err = dao.ds.Exec(ctx, sql, pID)
+	rowsAffected, err = ds.Exec(ctx, sql, pID)
 	return
 }
 
-func (dao *TasksDao) GetCount(ctx context.Context) (res int64, err error) {
+var GetCount = func(ctx context.Context) (res int64, err error) {
+	ds := DS(ctx)
 	sql := `select count(*) from tasks`
-	err = dao.ds.Query(ctx, sql, &res)
+	err = ds.Query(ctx, sql, &res)
 	return
 }
 
-func (dao *TasksDao) GetProjectTasks2(ctx context.Context, gID string) (res []*dto.TaskLi, err error) {
+var GetProjectTasks2 = func(ctx context.Context, gID string) (res []*dto.TaskLi, err error) {
+	ds := DS(ctx)
 	sql := `delete from tasks where p_id=?`
 	errMap := make(map[string]int)
 	_onRow := func(row map[string]interface{}) {
@@ -124,16 +129,17 @@ func (dao *TasksDao) GetProjectTasks2(ctx context.Context, gID string) (res []*d
 		SetString(&item.TSubject, row, "t_subject", errMap)
 		res = append(res, &item)
 	}
-	err = dao.ds.QueryAllRows(ctx, sql, _onRow, gID)
+	err = ds.QueryAllRows(ctx, sql, _onRow, gID)
 	if err == nil {
 		err = ErrMapToErr(errMap)
 	}
 	return
 }
 
-func (dao *TasksDao) GetTask(ctx context.Context, gID string) (*dto.Task, error) {
+var GetTask = func(ctx context.Context, gID string) (*dto.Task, error) {
+	ds := DS(ctx)
 	sql := `delete from tasks where p_id=?`
-	row, err := dao.ds.QueryRow(ctx, sql, gID)
+	row, err := ds.QueryRow(ctx, sql, gID)
 	if err != nil {
 		return nil, err
 	}

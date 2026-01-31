@@ -1,3 +1,4 @@
+# About
 A project demonstrating how to use [SQL DAL Maker](https://github.com/panedrone/sqldalmaker) + Golang.
 
 [Part 1](internal/gorm): using "github.com/go-gorm/gorm"<br/>
@@ -8,7 +9,12 @@ Front-end is written in both React 16.14 and Vue 2.7. Switch in [handlers.go](sh
 
 ![sdm-todo-app.png](sdm-todo-app.png)
 
-Docker:
+# News
+
+* mod: for sdm 1.321.2601 "mockable golang dao"
+* add: unit-tests of Gin handlers (thank to "mockable golang dao", sqlx only so far) 
+
+# Docker
 
 <table>
 <tr>
@@ -16,7 +22,7 @@ Docker:
 Creating
     </td>
     <td>
-docker-compose up -d
+sudo docker compose up -d
     </td>
 </tr>
 <tr>
@@ -24,14 +30,14 @@ docker-compose up -d
 Stopping and Removing
     </td>
     <td>
-docker-compose down
+sudo docker compose down
     </td>
 <tr>
     <td>
 Updating
     </td>
     <td>
-docker-compose up --build -d
+sudo docker compose up --build -d
     </td>
 </table>
 
@@ -71,25 +77,15 @@ sdm.xml:
 </sdm>
 ```
 
-Generated code in action:
+# Generated code in action
 
 ```go
-type projectHandlers struct {
-	dao *dbal.ProjectsDao
-}
-
-func NewProjectHandlers() shared.ProjectHandlers {
-	return &projectHandlers{
-		dao: dbal.NewProjectsDao(),
-	}
-}
-
 func (h *projectHandlers) ProjectCreate(ctx *gin.Context) {
 	var req request.Project
 	if err := request.BindJSON(ctx, &req); err != nil {
 		return
 	}
-	if err := h.dao.CreateProject(ctx, &m.Project{PName: req.PName}); err != nil {
+	if err := dbal.CreateProject(ctx, &dto.Project{PName: req.PName}); err != nil {
 		resp.Abort500(ctx, err)
 		return
 	}
@@ -97,7 +93,7 @@ func (h *projectHandlers) ProjectCreate(ctx *gin.Context) {
 }
 
 func (h *projectHandlers) ProjectsReadAll(ctx *gin.Context) {
-	all, err := h.dao.ReadAll(ctx)
+	all, err := dbal.ReadAll(ctx)
 	if err != nil {
 		resp.Abort500(ctx, err)
 		return
@@ -110,9 +106,9 @@ func (h *projectHandlers) ProjectRead(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	pr, err := h.dao.ReadProject(ctx, uri.PId)
+	pr, err := dbal.ReadProject(ctx, uri.PId)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if errors.Is(err, sql.ErrNoRows) {
 			resp.Abort404NotFound(ctx, err)
 			return
 		}
@@ -120,6 +116,7 @@ func (h *projectHandlers) ProjectRead(ctx *gin.Context) {
 		return
 	}
 	resp.JSON(ctx, http.StatusOK, pr)
+
 }
 
 func (h *projectHandlers) ProjectUpdate(ctx *gin.Context) {
@@ -131,8 +128,8 @@ func (h *projectHandlers) ProjectUpdate(ctx *gin.Context) {
 	if err := request.BindJSON(ctx, &req); err != nil {
 		return
 	}
-	pr := &m.Project{PId: uri.PId, PName: req.PName}
-	if _, err := h.dao.UpdateProject(ctx, pr); err != nil {
+	pr := &dto.Project{PID: uri.PId, PName: req.PName}
+	if _, err := dbal.UpdateProject(ctx, pr); err != nil {
 		resp.Abort500(ctx, err)
 	}
 }
@@ -142,7 +139,7 @@ func (h *projectHandlers) ProjectDelete(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	if _, err := h.dao.DeleteProject(ctx, &m.Project{PId: uri.PId}); err != nil {
+	if _, err := dbal.DeleteProject(ctx, &dto.Project{PID: uri.PId}); err != nil {
 		resp.Abort500(ctx, err)
 		return
 	}

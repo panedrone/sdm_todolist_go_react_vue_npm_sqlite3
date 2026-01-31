@@ -3,7 +3,7 @@ package handlers
 import (
 	"errors"
 	"net/http"
-	dbal2 "sdm_demo_todolist/internal/gorm/dbal"
+	"sdm_demo_todolist/internal/gorm/dbal"
 	m "sdm_demo_todolist/internal/gorm/dbal/models"
 	"sdm_demo_todolist/pkg"
 	"sdm_demo_todolist/pkg/request"
@@ -14,13 +14,10 @@ import (
 )
 
 type projectHandlers struct {
-	dao *dbal2.ProjectsDao
 }
 
 func NewGormProjectHandlers() etc.ProjectHandlers {
-	return &projectHandlers{
-		dao: dbal2.NewProjectsDao(),
-	}
+	return &projectHandlers{}
 }
 
 func (h *projectHandlers) ProjectCreate(ctx *gin.Context) {
@@ -28,7 +25,7 @@ func (h *projectHandlers) ProjectCreate(ctx *gin.Context) {
 	if err := request.BindJSON(ctx, &req); err != nil {
 		return
 	}
-	if err := h.dao.CreateProject(ctx, &m.Project{PName: req.PName}); err != nil {
+	if err := dbal.CreateProject(ctx, &m.Project{PName: req.PName}); err != nil {
 		resp.Abort500(ctx, err)
 		return
 	}
@@ -36,7 +33,7 @@ func (h *projectHandlers) ProjectCreate(ctx *gin.Context) {
 }
 
 func (h *projectHandlers) ProjectsReadAll(ctx *gin.Context) {
-	all, err := h.dao.ReadAll(ctx)
+	all, err := dbal.ReadAll(ctx)
 	if err != nil {
 		resp.Abort500(ctx, err)
 		return
@@ -49,7 +46,7 @@ func (h *projectHandlers) ProjectRead(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	pr, err := h.dao.ReadProject(ctx, uri.PId)
+	pr, err := dbal.ReadProject(ctx, uri.PId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			resp.Abort404NotFound(ctx, err)
@@ -71,7 +68,7 @@ func (h *projectHandlers) ProjectUpdate(ctx *gin.Context) {
 		return
 	}
 	pr := &m.Project{PID: uri.PId, PName: req.PName}
-	if _, err := h.dao.UpdateProject(ctx, pr); err != nil {
+	if _, err := dbal.UpdateProject(ctx, pr); err != nil {
 		resp.Abort500(ctx, err)
 	}
 }
@@ -81,7 +78,7 @@ func (h *projectHandlers) ProjectDelete(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	if _, err := h.dao.DeleteProject(ctx, &m.Project{PID: uri.PId}); err != nil {
+	if _, err := dbal.DeleteProject(ctx, &m.Project{PID: uri.PId}); err != nil {
 		resp.Abort500(ctx, err)
 		return
 	}

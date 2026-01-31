@@ -16,6 +16,8 @@ import (
 	"github.com/jmoiron/sqlx/reflectx"
 )
 
+var DS func(context context.Context) DataStore
+
 /*
 	This file is a part of SQL DAL Maker Project: https://sqldalmaker.sourceforge.net
 	It demonstrates how to implement an interface DataStore in Go + sqlx.
@@ -114,8 +116,8 @@ var ds = &_DS{}
 func (ds *_DS) initDb() (err error) {
 	// === PostgeSQL ===========================
 	ds.paramPrefix = "$"
-	ds.db, err = sqlx.Open("postgres", "postgres://postgres:sa@localhost/my-tests?sslmode=disable")
-	// ds.db, err = sqlx.Open("postgres", "postgres://postgres:sa@localhost/my-tests?sslmode=verify-full")
+	ds.db, err = sqlx.Open("postgres", "postgres://postgres:sa@localhost/my-test_tasks?sslmode=disable")
+	// ds.db, err = sqlx.Open("postgres", "postgres://postgres:sa@localhost/my-test_tasks?sslmode=verify-full")
 	// === SQLite3 =============================
 	// ds.db, err = sqlx.Open("sqlite3", "./log.sqlite")
 	// ds.db, err = sqlx.Open("sqlite3", "./northwindEF.sqlite")

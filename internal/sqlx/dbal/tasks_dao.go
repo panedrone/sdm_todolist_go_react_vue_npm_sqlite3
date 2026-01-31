@@ -8,16 +8,13 @@ import (
 	"sdm_demo_todolist/internal/sqlx/dbal/dto"
 )
 
-type TasksDao struct {
-	ds DataStore
-}
-
 // (C)RUD: tasks
 // Generated/AI values are passed to DTO/model.
 
-func (dao *TasksDao) CreateTask(ctx context.Context, item *dto.Task) error {
+var CreateTask = func(ctx context.Context, item *dto.Task) error {
+	ds := DS(ctx)
 	sql := `insert into tasks (p_id, t_priority, t_date, t_subject, t_comments) values (?, ?, ?, ?, ?)`
-	row, err := dao.ds.Insert(ctx, sql, "t_id", item.PID, item.TPriority, item.TDate, item.TSubject, item.TComments)
+	row, err := ds.Insert(ctx, sql, "t_id", item.PID, item.TPriority, item.TDate, item.TSubject, item.TComments)
 	if err == nil {
 		err = SetRes(&item.TID, row)
 	}
@@ -26,18 +23,20 @@ func (dao *TasksDao) CreateTask(ctx context.Context, item *dto.Task) error {
 
 // C(R)UD: tasks
 
-func (dao *TasksDao) ReadTaskList(ctx context.Context) (res []*dto.Task, err error) {
+var ReadTaskList = func(ctx context.Context) (res []*dto.Task, err error) {
+	ds := DS(ctx)
 	sql := `select * from tasks`
-	err = dao.ds.Select(ctx, sql, &res)
+	err = ds.Select(ctx, sql, &res)
 	return
 }
 
 // C(R)UD: tasks
 
-func (dao *TasksDao) ReadTask(ctx context.Context, tID int64) (*dto.Task, error) {
+var ReadTask = func(ctx context.Context, tID int64) (*dto.Task, error) {
+	ds := DS(ctx)
 	sql := `select * from tasks where t_id=?`
 	res := &dto.Task{}
-	err := dao.ds.Select(ctx, sql, res, tID)
+	err := ds.Select(ctx, sql, res, tID)
 	if err == nil {
 		return res, nil
 	}
@@ -46,41 +45,47 @@ func (dao *TasksDao) ReadTask(ctx context.Context, tID int64) (*dto.Task, error)
 
 // CR(U)D: tasks
 
-func (dao *TasksDao) UpdateTask(ctx context.Context, item *dto.Task) (rowsAffected int64, err error) {
+var UpdateTask = func(ctx context.Context, item *dto.Task) (rowsAffected int64, err error) {
+	ds := DS(ctx)
 	sql := `update tasks set p_id=?, t_priority=?, t_date=?, t_subject=?, t_comments=? where t_id=?`
-	rowsAffected, err = dao.ds.Exec(ctx, sql, item.PID, item.TPriority, item.TDate, item.TSubject, item.TComments, item.TID)
+	rowsAffected, err = ds.Exec(ctx, sql, item.PID, item.TPriority, item.TDate, item.TSubject, item.TComments, item.TID)
 	return
 }
 
 // CRU(D): tasks
 
-func (dao *TasksDao) DeleteTask(ctx context.Context, item *dto.Task) (rowsAffected int64, err error) {
+var DeleteTask = func(ctx context.Context, item *dto.Task) (rowsAffected int64, err error) {
+	ds := DS(ctx)
 	sql := `delete from tasks where t_id=?`
-	rowsAffected, err = dao.ds.Exec(ctx, sql, item.TID)
+	rowsAffected, err = ds.Exec(ctx, sql, item.TID)
 	return
 }
 
-func (dao *TasksDao) GetGroupTasks(ctx context.Context, gID int64) (res []*dto.TaskLi, err error) {
+var GetGroupTasks = func(ctx context.Context, gID int64) (res []*dto.TaskLi, err error) {
+	ds := DS(ctx)
 	sql := `select t_id, t_priority, t_date, t_subject from tasks where p_id =? 
 		order by t_id`
-	err = dao.ds.Select(ctx, sql, &res, gID)
+	err = ds.Select(ctx, sql, &res, gID)
 	return
 }
 
-func (dao *TasksDao) DeleteGroupTasks(ctx context.Context, gID string) (rowsAffected int64, err error) {
+var DeleteGroupTasks = func(ctx context.Context, gID string) (rowsAffected int64, err error) {
+	ds := DS(ctx)
 	sql := `delete from tasks where p_id=?`
-	rowsAffected, err = dao.ds.Exec(ctx, sql, gID)
+	rowsAffected, err = ds.Exec(ctx, sql, gID)
 	return
 }
 
-func (dao *TasksDao) GetCount(ctx context.Context) (res int64, err error) {
+var GetCount = func(ctx context.Context) (res int64, err error) {
+	ds := DS(ctx)
 	sql := `select count(*) from tasks`
-	err = dao.ds.Query(ctx, sql, &res)
+	err = ds.Query(ctx, sql, &res)
 	return
 }
 
-func (dao *TasksDao) GetGroupTasks2(ctx context.Context, gID string) (res []*dto.TaskLi, err error) {
+var GetGroupTasks2 = func(ctx context.Context, gID string) (res []*dto.TaskLi, err error) {
+	ds := DS(ctx)
 	sql := `delete from tasks where p_id=?`
-	err = dao.ds.Select(ctx, sql, &res, gID)
+	err = ds.Select(ctx, sql, &res, gID)
 	return
 }

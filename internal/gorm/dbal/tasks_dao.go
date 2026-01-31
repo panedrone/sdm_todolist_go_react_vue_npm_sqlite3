@@ -8,29 +8,28 @@ import (
 	"sdm_demo_todolist/internal/gorm/dbal/models"
 )
 
-type TasksDao struct {
-	ds DataStore
-}
-
 // (C)RUD: tasks
 // Generated/AI values are passed to DTO/model.
 
-func (dao *TasksDao) CreateTask(ctx context.Context, item *models.Task) error {
-	return dao.ds.Create(ctx, "tasks", item)
+var CreateTask = func(ctx context.Context, item *models.Task) error {
+	ds := DS(ctx)
+	return ds.Create(ctx, "tasks", item)
 }
 
 // C(R)UD: tasks
 
-func (dao *TasksDao) ReadTaskList(ctx context.Context) (res []*models.Task, err error) {
-	err = dao.ds.ReadAll(ctx, "tasks", &res)
+var ReadTaskList = func(ctx context.Context) (res []*models.Task, err error) {
+	ds := DS(ctx)
+	err = ds.ReadAll(ctx, "tasks", &res)
 	return
 }
 
 // C(R)UD: tasks
 
-func (dao *TasksDao) ReadTask(ctx context.Context, tID int64) (*models.Task, error) {
+var ReadTask = func(ctx context.Context, tID int64) (*models.Task, error) {
+	ds := DS(ctx)
 	res := &models.Task{}
-	err := dao.ds.Read(ctx, "tasks", res, tID)
+	err := ds.Read(ctx, "tasks", res, tID)
 	if err == nil {
 		return res, nil
 	}
@@ -39,21 +38,24 @@ func (dao *TasksDao) ReadTask(ctx context.Context, tID int64) (*models.Task, err
 
 // CR(U)D: tasks
 
-func (dao *TasksDao) UpdateTask(ctx context.Context, item *models.Task) (rowsAffected int64, err error) {
-	rowsAffected, err = dao.ds.Update(ctx, "tasks", item)
+var UpdateTask = func(ctx context.Context, item *models.Task) (rowsAffected int64, err error) {
+	ds := DS(ctx)
+	rowsAffected, err = ds.Update(ctx, "tasks", item)
 	return
 }
 
 // CRU(D): tasks
 
-func (dao *TasksDao) DeleteTask(ctx context.Context, item *models.Task) (rowsAffected int64, err error) {
-	rowsAffected, err = dao.ds.Delete(ctx, "tasks", item)
+var DeleteTask = func(ctx context.Context, item *models.Task) (rowsAffected int64, err error) {
+	ds := DS(ctx)
+	rowsAffected, err = ds.Delete(ctx, "tasks", item)
 	return
 }
 
-func (dao *TasksDao) RawProjectTasks(ctx context.Context, pID int64) (res []*models.TaskLi, err error) {
+var RawProjectTasks = func(ctx context.Context, pID int64) (res []*models.TaskLi, err error) {
+	ds := DS(ctx)
 	sql := `select t_id, t_priority, t_date, t_subject from tasks where p_id =? 
 		order by t_id`
-	err = dao.ds.Select(ctx, sql, &res, pID)
+	err = ds.Select(ctx, sql, &res, pID)
 	return
 }

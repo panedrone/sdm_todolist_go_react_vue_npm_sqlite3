@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	dbal2 "sdm_demo_todolist/internal/gorm/dbal"
+	"sdm_demo_todolist/internal/gorm/dbal"
 	"sdm_demo_todolist/internal/gorm/dbal/models"
 	"sdm_demo_todolist/pkg"
 	"sdm_demo_todolist/pkg/datetime"
@@ -16,13 +16,10 @@ import (
 )
 
 type taskHandlers struct {
-	dao *dbal2.TasksDao
 }
 
 func NewGormTaskHandlers() etc.TaskHandlers {
-	return &taskHandlers{
-		dao: dbal2.NewTasksDao(),
-	}
+	return &taskHandlers{}
 }
 
 func (h *taskHandlers) TaskCreate(ctx *gin.Context) {
@@ -39,7 +36,7 @@ func (h *taskHandlers) TaskCreate(ctx *gin.Context) {
 	t.TSubject = req.TSubject
 	t.TPriority = 1
 	t.TDate = datetime.NowLocalString()
-	if err := h.dao.CreateTask(ctx, &t); err != nil {
+	if err := dbal.CreateTask(ctx, &t); err != nil {
 		resp.Abort500(ctx, err)
 		return
 	}
@@ -51,7 +48,7 @@ func (h *taskHandlers) TaskRead(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	task, err := h.dao.ReadTask(ctx, uri.TId)
+	task, err := dbal.ReadTask(ctx, uri.TId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			resp.Abort404NotFound(ctx, err)
@@ -69,7 +66,7 @@ func (h *taskHandlers) TasksReadByProject(ctx *gin.Context) {
 		return
 	}
 	// tasks, err := tDao.RawProjectTasks(ctx, uri.PId)
-	tasks, err := h.dao.ReadProjectTasks(ctx, uri.PId)
+	tasks, err := dbal.ReadProjectTasks(ctx, uri.PId)
 	if err != nil {
 		resp.Abort500(ctx, err)
 		return
@@ -82,7 +79,7 @@ func (h *taskHandlers) TaskUpdate(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	t, err := h.dao.ReadTask(ctx, uri.TId)
+	t, err := dbal.ReadTask(ctx, uri.TId)
 	if err != nil {
 		resp.Abort400hBadRequest(ctx, err.Error())
 		return
@@ -115,7 +112,7 @@ func (h *taskHandlers) TaskUpdate(ctx *gin.Context) {
 	t.TPriority = req.TPriority
 	t.TDate = req.TDate
 	t.TComments = req.TComments
-	if _, err = h.dao.UpdateTask(ctx, t); err != nil {
+	if _, err = dbal.UpdateTask(ctx, t); err != nil {
 		resp.Abort500(ctx, err)
 		return
 	}
@@ -126,7 +123,7 @@ func (h *taskHandlers) TaskDelete(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	if _, err := h.dao.DeleteTask(ctx, &models.Task{TID: uri.TId}); err != nil {
+	if _, err := dbal.DeleteTask(ctx, &models.Task{TID: uri.TId}); err != nil {
 		resp.Abort500(ctx, err)
 		return
 	}

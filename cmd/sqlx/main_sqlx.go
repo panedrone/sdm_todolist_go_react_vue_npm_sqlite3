@@ -5,7 +5,7 @@ import (
 	"os"
 	"runtime"
 	"sdm_demo_todolist/internal/sqlx/dbal"
-	handlers2 "sdm_demo_todolist/internal/sqlx/handlers"
+	"sdm_demo_todolist/internal/sqlx/handlers"
 	"sdm_demo_todolist/internal/sqlx/swagger"
 	"sdm_demo_todolist/pkg"
 
@@ -47,7 +47,7 @@ func main() {
 	// whoIam := fmt.Sprintf(`%v, %v,%v sqlx, sqlite3, <a target="_blank" href="swagger/index.html">swagger</a>`, myOS, myArch, inContainer)
 	whoIam := fmt.Sprintf(`%v, %v,%v sqlx, sqlite3`, myOS, myArch, inContainer)
 
-	etc.AssignHandlers(myRouter, whoIam, handlers2.NewSqlxProjectHandlers(), handlers2.NewSqlxTaskHandlers())
+	etc.AssignHandlers(myRouter, whoIam, handlers.NewSqlxProjectHandlers(), handlers.NewSqlxTaskHandlers())
 
 	etc.Listen(myRouter)
 }

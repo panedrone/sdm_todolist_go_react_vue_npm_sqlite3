@@ -1,6 +1,8 @@
 package dbal
 
 import (
+	"context"
+
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -13,6 +15,9 @@ func (ds *_DS) initDb() (err error) {
 	ds.rootDb, err = gorm.Open(sqlite.Open("./db/todolist.sqlite"), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
+	DS = func(ctx context.Context) DataStore {
+		return ds
+	}
 	return
 }
 
@@ -39,12 +44,4 @@ func OpenDB() error {
 
 func CloseDB() error {
 	return ds.Close()
-}
-
-func NewProjectsDao() *ProjectsDao {
-	return &ProjectsDao{ds: ds}
-}
-
-func NewTasksDao() *TasksDao {
-	return &TasksDao{ds: ds}
 }

@@ -8,16 +8,13 @@ import (
 	"sdm_demo_todolist/internal/no_orm/dbal/dto"
 )
 
-type ProjectsDao struct {
-	ds DataStore
-}
-
 // (C)RUD: projects
 // Generated/AI values are passed to DTO/model.
 
-func (dao *ProjectsDao) CreateProject(ctx context.Context, item *dto.Project) error {
+var CreateProject = func(ctx context.Context, item *dto.Project) error {
+	ds := DS(ctx)
 	sql := `insert into projects (p_name) values (?)`
-	row, err := dao.ds.Insert(ctx, sql, "p_id", item.PName)
+	row, err := ds.Insert(ctx, sql, "p_id", item.PName)
 	if err == nil {
 		err = SetRes(&item.PID, row)
 	}
@@ -26,9 +23,10 @@ func (dao *ProjectsDao) CreateProject(ctx context.Context, item *dto.Project) er
 
 // C(R)UD: projects
 
-func (dao *ProjectsDao) ReadProject(ctx context.Context, pID int64) (*dto.Project, error) {
+var ReadProject = func(ctx context.Context, pID int64) (*dto.Project, error) {
+	ds := DS(ctx)
 	sql := `select * from projects where p_id=?`
-	row, err := dao.ds.QueryRow(ctx, sql, pID)
+	row, err := ds.QueryRow(ctx, sql, pID)
 	if err != nil {
 		return nil, err
 	}
@@ -42,21 +40,24 @@ func (dao *ProjectsDao) ReadProject(ctx context.Context, pID int64) (*dto.Projec
 
 // CR(U)D: projects
 
-func (dao *ProjectsDao) UpdateProject(ctx context.Context, item *dto.Project) (rowsAffected int64, err error) {
+var UpdateProject = func(ctx context.Context, item *dto.Project) (rowsAffected int64, err error) {
+	ds := DS(ctx)
 	sql := `update projects set p_name=? where p_id=?`
-	rowsAffected, err = dao.ds.Exec(ctx, sql, item.PName, item.PID)
+	rowsAffected, err = ds.Exec(ctx, sql, item.PName, item.PID)
 	return
 }
 
 // CRU(D): projects
 
-func (dao *ProjectsDao) DeleteProject(ctx context.Context, item *dto.Project) (rowsAffected int64, err error) {
+var DeleteProject = func(ctx context.Context, item *dto.Project) (rowsAffected int64, err error) {
+	ds := DS(ctx)
 	sql := `delete from projects where p_id=?`
-	rowsAffected, err = dao.ds.Exec(ctx, sql, item.PID)
+	rowsAffected, err = ds.Exec(ctx, sql, item.PID)
 	return
 }
 
-func (dao *ProjectsDao) ReadAll(ctx context.Context) (res []*dto.ProjectLi, err error) {
+var ReadAll = func(ctx context.Context) (res []*dto.ProjectLi, err error) {
+	ds := DS(ctx)
 	sql := `select p.*, 
 		(select count(*) from tasks where p_id=p.p_id) as p_tasks_count 
 		from projects p 
@@ -69,51 +70,57 @@ func (dao *ProjectsDao) ReadAll(ctx context.Context) (res []*dto.ProjectLi, err 
 		SetAny(&item.PTasksCount, row, "p_tasks_count", errMap)
 		res = append(res, &item)
 	}
-	err = dao.ds.QueryAllRows(ctx, sql, _onRow)
+	err = ds.QueryAllRows(ctx, sql, _onRow)
 	if err == nil {
 		err = ErrMapToErr(errMap)
 	}
 	return
 }
 
-func (dao *ProjectsDao) GetProjectIds(ctx context.Context) (res []int64, err error) {
+var GetProjectIds = func(ctx context.Context) (res []int64, err error) {
+	ds := DS(ctx)
 	sql := `select p.*, 
 		(select count(*) from tasks where p_id=p.p_id) as p_tasks_count 
 		from projects p 
 		order by p.p_id`
-	err = dao.ds.QueryAll(ctx, sql, &res)
+	err = ds.QueryAll(ctx, sql, &res)
 	return
 }
 
-func (dao *ProjectsDao) GetProjectID(ctx context.Context) (res []int64, err error) {
+var GetProjectID = func(ctx context.Context) (res []int64, err error) {
+	ds := DS(ctx)
 	sql := `select p.*, 
 		(select count(*) from tasks where p_id=p.p_id) as p_tasks_count 
 		from projects p 
 		order by p.p_id`
-	err = dao.ds.QueryAll(ctx, sql, &res)
+	err = ds.QueryAll(ctx, sql, &res)
 	return
 }
 
-func (dao *ProjectsDao) PID(ctx context.Context) (res int64, err error) {
+var PID = func(ctx context.Context) (res int64, err error) {
+	ds := DS(ctx)
 	sql := `select * from projects`
-	err = dao.ds.Query(ctx, sql, &res)
+	err = ds.Query(ctx, sql, &res)
 	return
 }
 
-func (dao *ProjectsDao) ProjectID(ctx context.Context, pID string) (res int64, err error) {
+var ProjectID = func(ctx context.Context, pID string) (res int64, err error) {
+	ds := DS(ctx)
 	sql := `select * from projects where p_id=?`
-	err = dao.ds.Query(ctx, sql, &res, pID)
+	err = ds.Query(ctx, sql, &res, pID)
 	return
 }
 
-func (dao *ProjectsDao) GetPIds(ctx context.Context, pID int64) (res []int64, err error) {
+var GetPIds = func(ctx context.Context, pID int64) (res []int64, err error) {
+	ds := DS(ctx)
 	sql := `select * from projects where p_id=?`
-	err = dao.ds.QueryAll(ctx, sql, &res, pID)
+	err = ds.QueryAll(ctx, sql, &res, pID)
 	return
 }
 
-func (dao *ProjectsDao) GetPID(ctx context.Context, pID int64) (res int64, err error) {
+var GetPID = func(ctx context.Context, pID int64) (res int64, err error) {
+	ds := DS(ctx)
 	sql := `select * from projects where p_id=?`
-	err = dao.ds.Query(ctx, sql, &res, pID)
+	err = ds.Query(ctx, sql, &res, pID)
 	return
 }

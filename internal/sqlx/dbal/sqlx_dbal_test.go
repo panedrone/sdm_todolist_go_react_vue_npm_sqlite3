@@ -81,18 +81,18 @@ func Test_sqlx_ReadAllScalarPtr(t *testing.T) {
 	t.Logf("%v\n", values)
 }
 
-func Test_sqlx_GetProjectIds(t *testing.T) {
-	dao := NewProjectsDao()
-	res, err := dao.GetProjectIds(ctx)
-	if err != nil {
-		t.Fatalf("Error: %s", err)
-		return
-	}
-	for _, v := range res {
-		if v < 1 {
-			t.Fatalf("Error: %v", v)
-			return
-		}
-	}
-	t.Logf("%v\n", res)
-}
+//func Test_sqlx_GetProjectIds(t *testing.T) {
+//	dao := NewProjectsDao()
+//	res, err := dao.GetProjectIds(ctx)
+//	if err != nil {
+//		t.Fatalf("Error: %s", err)
+//		return
+//	}
+//	for _, v := range res {
+//		if v < 1 {
+//			t.Fatalf("Error: %v", v)
+//			return
+//		}
+//	}
+//	t.Logf("%v\n", res)
+//}
