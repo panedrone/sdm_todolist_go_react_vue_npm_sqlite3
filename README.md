@@ -12,7 +12,7 @@ Front-end is written in both React 16.14 and Vue 2.7. Switch in [handlers.go](sh
 # News
 
 * mod: for sdm 1.321.2601 "mockable golang dao"
-* add: unit-tests of Gin handlers (thank to "mockable golang dao", sqlx only so far) 
+* add: [unit-tests](internal/sqlx/handlers) of Gin handlers (thank to "mockable golang dao", sqlx only so far) 
 
 # Docker
 
