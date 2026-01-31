@@ -41,7 +41,7 @@ sudo docker compose up --build -d
     </td>
 </table>
 
-sdm.xml:
+# sdm.xml
 
 ```xml
 <sdm>
