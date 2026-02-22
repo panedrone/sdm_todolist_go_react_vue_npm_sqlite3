@@ -1,6 +1,6 @@
 body {
-    font-family: 'trebuchet MS', 'Lucida sans', Arial, serif;
-    font-size: 10pt;
+    /*font-family: 'trebuchet MS', 'Lucida sans', Arial, serif;*/
+    /*font-size: 10pt;*/
     color: #555;
 }
 
@@ -14,9 +14,9 @@ body {
 .bg {
 }
 
-h2 {
-    margin: 8px;
-}
+/*h2 {*/
+/*    margin: 8px;*/
+/*}*/
 
 table.bg td {
     vertical-align: top;

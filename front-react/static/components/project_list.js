@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 
 import * as shared from "./shared";
@@ -8,13 +10,17 @@ import * as api from "./api"
 let _updateProjects = (_) => {
 }
 
-const ProjectList = () => {
+export const ProjectList = () => {
 
     function _handleClick(project) {
         fire.fetchCurrentProject(project.p_id)
         fire.fetchProjectTasks(project.p_id)
         fire.setVisibleTaskForm(false)
     }
+
+    React.useEffect(() => {
+        fetchProjects()
+    }, [])
 
     const [data, setData] = React.useState([])
 
@@ -55,7 +61,7 @@ export function fetchProjects() {
     })
 }
 
-const ProjectCreateButton = () => {
+export const ProjectCreateButton = () => {
 
     function projectCreate() {
         if (_newProjectName.length === 0) {
@@ -78,9 +84,16 @@ let _newProjectName = ""
 
 const _fieldNewProjectName = <StringField onChange={v => _newProjectName = v}/>
 
-export function renderComponents() {
-    fire.fetchProjects = fetchProjects
-    shared.render(<ProjectList/>, 'projects')
-    shared.render(_fieldNewProjectName, 'newProjectName')
-    shared.render(<ProjectCreateButton/>, 'projectCreate')
+export const ProjectCreateField = () => {
+
+    return (
+        <StringField onChange={v => _newProjectName = v}/>
+    )
 }
+
+// export function renderComponents() {
+//     fire.fetchProjects = fetchProjects
+//     shared.render(<ProjectList/>, 'projects')
+//     shared.render(_fieldNewProjectName, 'newProjectName')
+//     shared.render(<ProjectCreateButton/>, 'projectCreate')
+// }

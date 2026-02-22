@@ -1,37 +1,155 @@
-import * as whoiam from './components/whoiam'
-import * as project_list from './components/project_list'
-import * as project_details from './components/project_details'
-import * as task_details from './components/task_details'
-import * as api from './components/api'
+"use client";
 
-project_list.renderComponents()
-project_details.renderComponents()
-task_details.renderComponents()
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'react-calendar/dist/Calendar.css';
+import 'react-tabs/style/react-tabs.css';
 
-api.renderComponents()
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
-// Render "Loader" at the very end: it ensures existence of all dependencies:
+import * as React from "react";
+import ReactDOM from "react-dom/client";
+import {ProjectCreateButton, ProjectCreateField, ProjectList} from './components/project_list'
+import {WhoIAm} from "./components/whoiam";
 
-// const Loader = () => {
-//
-//     // direct call of windowOnLoad() may cause something like:
-//     //
-//     // Warning: Cannot update a component (`Wait`) while rendering a different component (`Loader`). To locate the bad setState() call inside `Loader`...
-//     //
-//     // === panedrone: cannot call "setState()" of other component inside function "Loader"
-//     //
-//     // windowOnLoad() === wrong!
-//
-//     React.useEffect(() => windowOnLoad());
-//
-//     return "";
-// }
-//
-// shared.render(<Loader/>, "loader")
 
-async function windowOnLoad() {
-    whoiam.fetchWhoIAm()
-    project_list.fetchProjects()
+// project_list.renderComponents()
+// project_details.renderComponents()
+// task_details.renderComponents()
+
+// api.renderComponents()
+
+const App = () => {
+
+    return <>
+        <table className="bg">
+            <tbody>
+            <tr>
+                <td>
+                    <div className="card">
+                        <h2 id="whoiam">
+                            <WhoIAm/>
+                        </h2>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div className="red-banner" id="serverError"></div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <table className="bg">
+            <tbody>
+            <tr>
+                <td>
+                    <div className="card">
+                        <table>
+                            <tbody>
+                            <tr>
+                                <td id="projects">
+                                    <ProjectList/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <table className="controls">
+                                        <tbody>
+                                        <tr>
+                                            <td id="newProjectName">
+                                                <ProjectCreateField/>
+                                            </td>
+                                            <td className="w1" id="projectCreate">
+                                                <ProjectCreateButton/>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+                <td id="projectDetails" style={{display: 'none'}}>
+                    <div className="card">
+                        <table>
+                            <tbody>
+                            <tr>
+                                <td id="projectActions">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td id="tasks">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <table className="controls">
+                                        <tbody>
+                                        <tr>
+                                            <td id="newTaskSubject">
+                                            </td>
+                                            <td className="w1" id="taskCreate">
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+                <td id="taskForm" style={{padding: '2px', display: 'none'}}>
+                    <div className="card">
+                        <div id="taskActions"></div>
+
+                        <table className="edit-form">
+                            <tbody>
+                            <tr>
+                                <td className="form-label">Date</td>
+                                <td id="t_date">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td className="form-label">Subject</td>
+                                <td className="w100" id="t_subject">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td className="form-label w1">Priority 1..10</td>
+                                <td id="t_priority">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colSpan="2" id="t_comments">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div className="task-error" id="taskError">
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+    </>
 }
 
-windowOnLoad().then(() => console.log('== windowOnLoad() completed =='))
+// async function windowOnLoad() {
+//     whoiam.fetchWhoIAm()
+//     project_list.fetchProjects()
+// }
+//
+// windowOnLoad().then(() => console.log('== windowOnLoad() completed =='))
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+    // <React.StrictMode>
+    <App/>
+    // </React.StrictMode>
+);

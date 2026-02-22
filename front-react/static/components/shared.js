@@ -1,9 +1,16 @@
-import * as ReactDOM from "react-dom";
+// import * as ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 
 import fire from "./event_bus";
 
 export function render(component, containerID) {
-    ReactDOM.render(component, document.getElementById(containerID))
+    // ReactDOM.render(component, document.getElementById(containerID))
+    const root = ReactDOM.createRoot(document.getElementById(containerID));
+    root.render(
+        // <React.StrictMode>
+        component
+        // </React.StrictMode>
+    );
 }
 
 fire.setVisibleProjectDetails = (yes) => {
