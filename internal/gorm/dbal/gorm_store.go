@@ -121,7 +121,7 @@ func (ds *_DS) isMsSql() bool {
 }
 
 /*
-	Implement the method initDb() in an external file (e.g. "data_store_gorm_ex.go"):
+	Implement the method initDb() in an external file (e.g. "gorm_store_ex.go"):
 
 package dbal
 

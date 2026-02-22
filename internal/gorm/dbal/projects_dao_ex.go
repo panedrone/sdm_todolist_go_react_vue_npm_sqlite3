@@ -6,9 +6,7 @@ import (
 )
 
 var ReadAll = func(ctx context.Context) (res []*models.ProjectLi, err error) {
-	ds := DS(ctx)
-	db := ds.Session(ctx)
-	subQuery := db.Table("tasks").Select("count(*)").Where("tasks.p_id = projects.p_id")
-	err = db.Table("projects").Select("*, (?) as p_tasks_count", subQuery).Find(&res).Error
+	subQuery := RootDb().Table("tasks").Select("count(*)").Where("tasks.p_id = projects.p_id")
+	err = WithContext(ctx).Table("projects").Select("*, (?) as p_tasks_count", subQuery).Find(&res).Error
 	return
 }

@@ -9,7 +9,7 @@ import (
 	//"gorm.io/gorm/logger"
 )
 
-var ds = &_DS{} // private for this package
+var _ds = &_DS{} // private for this package
 
 func (ds *_DS) initDb() (err error) {
 	ds.rootDb, err = gorm.Open(sqlite.Open("./db/todolist.sqlite"), &gorm.Config{
@@ -39,9 +39,23 @@ func (ds *_DS) initDb() (err error) {
 //}
 
 func OpenDB() error {
-	return ds.Open()
+	return _ds.Open()
 }
 
 func CloseDB() error {
-	return ds.Close()
+	return _ds.Close()
+}
+
+func RootDb() *gorm.DB {
+	return _ds.rootDb // to build subqueries subquery
+}
+
+func WithContext(ctx context.Context) *gorm.DB {
+	return _ds.Session(ctx)
+}
+
+func RunTx(ctx context.Context, txFunc func(tx *gorm.DB) error) error {
+	return WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		return txFunc(tx)
+	})
 }
