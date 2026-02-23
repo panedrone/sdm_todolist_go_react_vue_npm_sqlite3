@@ -25,7 +25,10 @@ export const StringField = ({onChange, saveUpdater}) => {
     return (
         <label>
             <Form.Control
-                type="text" ref={refDom} onChange={handleChange}/>
+                type="text"
+                ref={refDom}
+                onChange={handleChange}
+            />
         </label>
     )
 }

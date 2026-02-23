@@ -1,8 +1,6 @@
 "use client";
 
 import * as React from "react";
-
-import * as shared from "./shared";
 import {ErrorArea} from "./error_area";
 import {IntegerField, StringField, TextAreaField} from "./form_components";
 import fire from './event_bus.js'
@@ -140,8 +138,6 @@ let _updateTaskError = (_) => {
 }
 
 export const TaskDetails = () => {
-    React.useEffect(() => {
-    }, [])
     return <>
         <Card className={"bg-white rounded-3 mb-3"}>
             <Card.Body>
@@ -195,7 +191,6 @@ export const TaskDetails = () => {
                 <div className="task-error" id="taskError">
                     <ErrorArea saveUpdater={(updater) => _updateTaskError = updater}/>
                 </div>
-
             </Card.Body>
         </Card>
     </>
