@@ -21,6 +21,7 @@ Front-end is written in both React 18.2.0 and Vue 2.7. Switch in [handlers.go](p
 
 # News
 
+* ported to React 18.2.0
 * mod: for sdm 1.321.2601 "mockable golang dao"
 * add: [unit-tests](internal/sqlx/handlers) of Gin handlers (thank to "mockable golang dao", sqlx only so far) 
 
