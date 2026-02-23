@@ -1,4 +1,14 @@
 # About
+
+```
+┌───────────────────────────────────────────────────┐
+│            panedrone's sdm. 2011-2026             │
+│               gin version: v1.11.0                │
+│              http://127.0.0.1:3301/               │
+│                     CPUs: 20                      │
+└───────────────────────────────────────────────────┘
+```
+
 A project demonstrating how to use [SQL DAL Maker](https://github.com/panedrone/sqldalmaker) + Golang.
 
 [Part 1](internal/gorm): using "github.com/go-gorm/gorm"<br/>

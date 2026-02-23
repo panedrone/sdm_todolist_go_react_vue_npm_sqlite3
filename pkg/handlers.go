@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -82,7 +84,38 @@ func Listen(myRouter *gin.Engine) {
 		return listen
 	}
 
-	fmt.Printf("Welcome 📍 to %s\n", "http://"+getAppListen())
+	// Данные
+	title := "panedrone's sdm. 2011-2026"
+	version := "gin version: " + gin.Version
+	url := fmt.Sprintf("http://%s/", getAppListen())
+	cpus := fmt.Sprintf("CPUs: %d", runtime.NumCPU())
+
+	// Функция для центрирования строки внутри рамки шириной W
+	center := func(s string, w int) string {
+		padding := w - len(s)
+		if padding < 0 {
+			return s
+		}
+		left := padding / 2
+		right := padding - left
+		return strings.Repeat(" ", left) + s + strings.Repeat(" ", right)
+	}
+
+	width := 51
+	logo := fmt.Sprintf(`
+ ┌───────────────────────────────────────────────────┐
+ │%s│
+ │%s│
+ │%s│
+ │%s│
+ └───────────────────────────────────────────────────┘
+`,
+		center(title, width),
+		center(version, width),
+		center(url, width),
+		center(cpus, width),
+	)
+	fmt.Println(logo)
 
 	log.Fatal(myRouter.Run(getAppListen()))
 }
