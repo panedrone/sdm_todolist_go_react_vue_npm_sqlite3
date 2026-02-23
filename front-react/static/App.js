@@ -15,19 +15,18 @@ import * as api from "./components/api";
 import {PaneProjectDetails} from "./components/project_details";
 import {TaskDetails} from "./components/task_details";
 import {Col, Row} from "react-bootstrap";
+import {ErrorArea} from "./components/error_area";
 
 const App = () => {
-
-    React.useEffect(() => {
-        api.renderComponents()
-    }, [])
 
     return <>
         <div className="d-flex">
             <WhoIAm/>
         </div>
 
-        <div className="red-banner" id="serverError"></div>
+        <div className="red-banner" id="serverError">
+            <ErrorArea saveUpdater={(updater) => api.assignServerErrorUpdater(updater)} />
+        </div>
 
         <Row className="g-3 w-auto h-auto">
             <Col className={"col-auto"}>

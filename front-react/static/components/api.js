@@ -187,8 +187,6 @@ function _showException(reason) {
 let _updateServerError = (_) => {
 }
 
-const serverError = <ErrorArea saveUpdater={(updater) => _updateServerError = updater}/>
-
-export function renderComponents() {
-    render(serverError, 'serverError');
+export let assignServerErrorUpdater = (u) => {
+    _updateServerError = u
 }
