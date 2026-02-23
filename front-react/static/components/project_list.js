@@ -1,16 +1,15 @@
 "use client";
 
 import * as React from "react";
-
-import * as shared from "./shared";
 import {StringField} from "./form_components";
 import fire from './event_bus.js'
 import * as api from "./api"
+import {Button, Card, Table} from "react-bootstrap";
 
 let _updateProjects = (_) => {
 }
 
-export const ProjectList = () => {
+const ProjectList = () => {
 
     function _handleClick(project) {
         fire.fetchCurrentProject(project.p_id)
@@ -26,11 +25,11 @@ export const ProjectList = () => {
 
     _updateProjects = setData
 
-    return <table className="section">
+    return <Table className="section mb-3">
         <thead>
         <tr>
             <th>Project</th>
-            <th className="w1 nowrap">Tasks Count</th>
+            <th className="text-nowrap" width={1}>Tasks Count</th>
         </tr>
         </thead>
         <tbody>
@@ -50,7 +49,7 @@ export const ProjectList = () => {
             )
         }
         </tbody>
-    </table>
+    </Table>
 }
 
 export function fetchProjects() {
@@ -61,7 +60,7 @@ export function fetchProjects() {
     })
 }
 
-export const ProjectCreateButton = () => {
+const ProjectCreateButton = () => {
 
     function projectCreate() {
         if (_newProjectName.length === 0) {
@@ -74,26 +73,30 @@ export const ProjectCreateButton = () => {
     }
 
     return (
-        <a href="#">
-            <input type="button" value="+" onClick={() => projectCreate()}/>
-        </a>
+        <Button variant={"secondary"} className={"opacity-50"} onClick={() => projectCreate()}>
+            +
+        </Button>
     )
 }
 
 let _newProjectName = ""
 
-const _fieldNewProjectName = <StringField onChange={v => _newProjectName = v}/>
-
-export const ProjectCreateField = () => {
-
+const ProjectCreateField = () => {
     return (
         <StringField onChange={v => _newProjectName = v}/>
     )
 }
 
-// export function renderComponents() {
-//     fire.fetchProjects = fetchProjects
-//     shared.render(<ProjectList/>, 'projects')
-//     shared.render(_fieldNewProjectName, 'newProjectName')
-//     shared.render(<ProjectCreateButton/>, 'projectCreate')
-// }
+export const PaneProjectList = () => {
+    return (
+        <Card className={"bg-white rounded-3 mb-3"}>
+            <Card.Body>
+                <ProjectList/>
+                <div className="d-inline-flex align-items-center gap-2 w-100">
+                    <ProjectCreateField/>
+                    <ProjectCreateButton/>
+                </div>
+           </Card.Body>
+        </Card>
+    )
+}

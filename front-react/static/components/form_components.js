@@ -1,4 +1,7 @@
+"use client";
+
 import * as React from "react";
+import Form from "react-bootstrap/Form";
 
 export const StringField = ({onChange, saveUpdater}) => {
 
@@ -21,7 +24,8 @@ export const StringField = ({onChange, saveUpdater}) => {
 
     return (
         <label>
-            <input type="text" ref={refDom} onChange={handleChange}/>
+            <Form.Control
+                type="text" ref={refDom} onChange={handleChange}/>
         </label>
     )
 }

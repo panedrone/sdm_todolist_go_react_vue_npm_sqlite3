@@ -184,8 +184,6 @@ function _showException(reason) {
     fire.showServerError(reason.toString())
 }
 
-
-
 let _updateServerError = (_) => {
 }
 

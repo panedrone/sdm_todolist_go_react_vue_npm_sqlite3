@@ -11,7 +11,7 @@ const config = {
     entry: {
         // https://www.youtube.com/watch?v=JcKRovPhGo8&ab_channel=Tocode
         // 14:50
-        main: './static/app.js'
+        main: './static/App.js'
     },
     resolve: { // package.json.PANEDRONE.vue_2.7
         alias: {

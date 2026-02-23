@@ -1,6 +1,7 @@
 package etc
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -80,6 +81,8 @@ func Listen(myRouter *gin.Engine) {
 		}
 		return listen
 	}
+
+	fmt.Printf("Welcome 📍 to %s\n", "http://"+getAppListen())
 
 	log.Fatal(myRouter.Run(getAppListen()))
 }

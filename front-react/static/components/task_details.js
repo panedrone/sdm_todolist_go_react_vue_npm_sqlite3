@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 
 import * as shared from "./shared";
@@ -5,6 +7,7 @@ import {ErrorArea} from "./error_area";
 import {IntegerField, StringField, TextAreaField} from "./form_components";
 import fire from './event_bus.js'
 import * as api from "./api"
+import {Button, Card} from "react-bootstrap";
 
 let _updateSubject = (_) => {
 }
@@ -24,8 +27,13 @@ let _currentTask = {
     "t_comments": ""
 }
 
+let _updateTaskTitle = (_) => {
+}
+
 const TaskTitle = ({initial}) => {
-    return <span>{initial}</span>
+    const [taskTitle, setTaskTitle] = React.useState(initial);
+    _updateTaskTitle = setTaskTitle
+    return <span>{taskTitle}</span>
 }
 
 fire.fetchTask = (t_id) => {
@@ -36,7 +44,7 @@ fire.fetchTask = (t_id) => {
             fire.showServerError("failed to get task data")
             return
         }
-        shared.render(<TaskTitle initial={_currentTask.t_subject}/>, 'taskTitle')
+        _updateTaskTitle(_currentTask.t_subject)
         _updateSubject(_currentTask.t_subject)
         _updateDate(_currentTask.t_date)
         _updatePriority(_currentTask.t_priority)
@@ -75,33 +83,43 @@ const TaskButtons = () => {
         })
     }
 
-    return (
+    return <>
         <table className="controls">
             <tbody>
             <tr>
                 <td className="w100">
                     <div className="title" id="taskTitle">
+                        <TaskTitle/>
                     </div>
                 </td>
                 <td className="w1">
-                    <a href="#">
-                        <input type="button" value="&#x2713;" onClick={() => _taskUpdate()}/>
-                    </a>
+                    <Button
+                        variant={"secondary"} className={"opacity-50"}
+                        onClick={() => _taskUpdate()}
+                    >
+                        &#x2713;
+                    </Button>
                 </td>
                 <td className="w1">
-                    <a href="#">
-                        <input type="button" value="x" onClick={() => _taskDelete()}/>
-                    </a>
+                    <Button
+                        variant={"secondary"} className={"opacity-50"}
+                        onClick={() => _taskDelete()}
+                    >
+                        x
+                    </Button>
                 </td>
                 <td className="w1">
-                    <a href="#">
-                        <input type="button" value="&lt;" onClick={() => fire.setVisibleTaskForm(false)}/>
-                    </a>
+                    <Button
+                        variant={"secondary"} className={"opacity-50"}
+                        onClick={() => fire.setVisibleTaskForm(false)}
+                    >
+                        &lt;
+                    </Button>
                 </td>
             </tr>
             </tbody>
         </table>
-    )
+    </>
 }
 
 function _hideTaskError() {
@@ -118,40 +136,67 @@ async function _showTaskError(resp) {
     _updateTaskError(msg)
 }
 
-const _fieldSubject = <StringField onChange={v => {
-    _currentTask.t_subject = v
-}} saveUpdater={(updater) => {
-    _updateSubject = updater
-}}/>
-
-const _fieldDate = <StringField onChange={v => {
-    _currentTask.t_date = v
-}} saveUpdater={(updater) => {
-    _updateDate = updater
-}}/>
-
-const _fieldPriority = <IntegerField onChange={v => {
-    _currentTask.t_priority = v
-}} saveUpdater={(updater) => {
-    _updatePriority = updater
-}}/>
-
-const _fieldComments = <TextAreaField onChange={v => {
-    _currentTask.t_comments = v
-}} saveUpdater={(updater) => {
-    _updateComments = updater
-}}/>
-
 let _updateTaskError = (_) => {
 }
 
-const _taskError = <ErrorArea saveUpdater={(updater) => _updateTaskError = updater}/>
+export const TaskDetails = () => {
+    React.useEffect(() => {
+    }, [])
+    return <>
+        <Card className={"bg-white rounded-3 mb-3"}>
+            <Card.Body>
+                <div id="taskActions">
+                    <TaskButtons/>
+                </div>
 
-export function renderComponents() {
-    shared.render(<TaskButtons/>, 'taskActions')
-    shared.render(_fieldSubject, 't_subject')
-    shared.render(_fieldDate, 't_date')
-    shared.render(_fieldPriority, 't_priority')
-    shared.render(_fieldComments, 't_comments')
-    shared.render(_taskError, 'taskError');
+                <table className="edit-form">
+                    <tbody>
+                    <tr>
+                        <td className="form-label">Date</td>
+                        <td id="t_date">
+                            <StringField onChange={v => {
+                                _currentTask.t_date = v
+                            }} saveUpdater={(updater) => {
+                                _updateDate = updater
+                            }}/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td className="form-label">Subject</td>
+                        <td className="w100" id="t_subject">
+                            <StringField onChange={v => {
+                                _currentTask.t_subject = v
+                            }} saveUpdater={(updater) => {
+                                _updateSubject = updater
+                            }}/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td className="form-label w1">Priority 1..10</td>
+                        <td id="t_priority">
+                            <IntegerField onChange={v => {
+                                _currentTask.t_priority = v
+                            }} saveUpdater={(updater) => {
+                                _updatePriority = updater
+                            }}/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colSpan="2" id="t_comments">
+                            <TextAreaField onChange={v => {
+                                _currentTask.t_comments = v
+                            }} saveUpdater={(updater) => {
+                                _updateComments = updater
+                            }}/>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div className="task-error" id="taskError">
+                    <ErrorArea saveUpdater={(updater) => _updateTaskError = updater}/>
+                </div>
+
+            </Card.Body>
+        </Card>
+    </>
 }

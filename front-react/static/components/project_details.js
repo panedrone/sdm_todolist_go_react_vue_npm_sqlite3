@@ -1,18 +1,13 @@
-import * as React from "react";
+"use client";
 
-import * as shared from "./shared";
+import * as React from "react";
 import {StringField} from "./form_components";
 import fire from './event_bus'
 import * as api from "./api"
+import {Button, Card} from "react-bootstrap";
 
 let _updateCurrentProjectName = (_) => {
 }
-
-const _fieldCurrentProjectName = <StringField onChange={v => {
-    _currentProject.p_name = v
-}} saveUpdater={(updater) => {
-    _updateCurrentProjectName = updater
-}}/>
 
 const ProjectButtons = () => {
 
@@ -37,21 +32,32 @@ const ProjectButtons = () => {
             <tbody>
             <tr>
                 <td id="currentProjectName">
+                    <StringField onChange={v => {
+                        _currentProject.p_name = v
+                    }} saveUpdater={(updater) => {
+                        _updateCurrentProjectName = updater
+                    }}/>
                 </td>
                 <td className="w1">
-                    <a href="#">
-                        <input type="button" value="&#x2713;" onClick={() => _projectUpdate()}/>
-                    </a>
+                    <Button variant={"secondary"} className={"opacity-50"}
+                            onClick={() => _projectUpdate()}
+                    >
+                        &#x2713;
+                    </Button>
                 </td>
                 <td className="w1">
-                    <a href="#">
-                        <input type="button" value="x" onClick={() => _projectDelete()}/>
-                    </a>
+                    <Button variant={"secondary"} className={"opacity-50"}
+                            onClick={() => _projectDelete()}
+                    >
+                        x
+                    </Button>
                 </td>
                 <td className="w1">
-                    <a href="#">
-                        <input type="button" value="&lt;" onClick={() => fire.setVisibleProjectDetails(false)}/>
-                    </a>
+                    <Button variant={"secondary"} className={"opacity-50"}
+                            onClick={() => fire.setVisibleProjectDetails(false)}
+                    >
+                        &lt;
+                    </Button>
                 </td>
             </tr>
             </tbody>
@@ -69,11 +75,13 @@ const ProjectTasks = () => {
     _updateProjectTasks = setData
 
     return <table className="section">
+        <thead>
         <tr>
             <th className="w1">Date</th>
             <th>Subject</th>
             <th className="w1">Priority</th>
         </tr>
+        </thead>
         <tbody>
         {
             data.map((task, index) => {
@@ -109,9 +117,9 @@ const TaskCreateButton = () => {
     }
 
     return (
-        <a href="#">
-            <input type="button" value="+" onClick={() => _taskCreate()}/>
-        </a>
+        <Button variant={"secondary"} className={"opacity-50"} onClick={() => _taskCreate()}>
+            +
+        </Button>
     )
 }
 
@@ -137,18 +145,52 @@ fire.fetchProjectTasks = (p_id) => {
     })
 }
 
-const _projectTasks = <ProjectTasks/>
-
 let _newTaskSubject = ""
 
-const _fieldNewTaskSubject = <StringField onChange={v =>
-    _newTaskSubject = v
-}/>
+export const PaneProjectDetails = () => {
 
-export function renderComponents() {
-    shared.render(<ProjectButtons/>, 'projectActions') // !!!! ==== before _fieldCurrentProjectName
-    shared.render(_fieldCurrentProjectName, 'currentProjectName')
-    shared.render(_projectTasks, 'tasks')
-    shared.render(_fieldNewTaskSubject, 'newTaskSubject')
-    shared.render(<TaskCreateButton/>, 'taskCreate')
+    React.useEffect(() => {
+
+    }, [])
+
+    return <>
+        <Card className={"bg-white rounded-3 mb-3"}>
+            <Card.Body>
+
+                <table>
+                    <tbody>
+                    <tr>
+                        <td id="projectActions">
+                            <ProjectButtons/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td id="tasks">
+                            <ProjectTasks/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <table className="controls">
+                                <tbody>
+                                <tr>
+                                    <td id="newTaskSubject">
+                                        <StringField onChange={v =>
+                                            _newTaskSubject = v
+                                        }/>
+                                    </td>
+                                    <td className="w1" id="taskCreate">
+                                        <TaskCreateButton/>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </Card.Body>
+        </Card>
+
+    </>
 }
