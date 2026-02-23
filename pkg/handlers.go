@@ -84,15 +84,16 @@ func Listen(myRouter *gin.Engine) {
 		return listen
 	}
 
-	// Данные
-	title := "panedrone's sdm. 2011-2026"
-	version := "gin version: " + gin.Version
-	url := fmt.Sprintf("http://%s/", getAppListen())
-	cpus := fmt.Sprintf("CPUs: %d", runtime.NumCPU())
+	// Сбор данных
+	title := "panedrone's sdm"
+	ginVer := "gin version: v1.11.0" // или gin.Version
+	goVer := "go sdk: " + runtime.Version()
+	appUrl := fmt.Sprintf("http://%s/", getAppListen())
+	cpuCount := fmt.Sprintf("CPUs: %d", runtime.NumCPU())
 
-	// Функция для центрирования строки внутри рамки шириной W
-	center := func(s string, w int) string {
-		padding := w - len(s)
+	// Функция для идеального центрирования
+	center := func(s string, width int) string {
+		padding := width - len(s)
 		if padding < 0 {
 			return s
 		}
@@ -101,21 +102,24 @@ func Listen(myRouter *gin.Engine) {
 		return strings.Repeat(" ", left) + s + strings.Repeat(" ", right)
 	}
 
-	width := 51
+	const frameWidth = 51
 	logo := fmt.Sprintf(`
  ┌───────────────────────────────────────────────────┐
  │%s│
  │%s│
  │%s│
  │%s│
+ │%s│
  └───────────────────────────────────────────────────┘
 `,
-		center(title, width),
-		center(version, width),
-		center(url, width),
-		center(cpus, width),
+		center(title, frameWidth),
+		center(ginVer, frameWidth),
+		center(goVer, frameWidth),
+		center(appUrl, frameWidth),
+		center(cpuCount, frameWidth),
 	)
-	fmt.Println(logo)
+
+	fmt.Print(logo)
 
 	log.Fatal(myRouter.Run(getAppListen()))
 }
