@@ -31,9 +31,9 @@ export const WhoIAm = () => {
     return (
         <Card className={"bg-white rounded-3 mb-2"}>
             <Card.Body>
-                <h2 id="whoiam">
+                <h4 id="whoiam">
                     <RawHtml rawHtml={who}/>
-                </h2>
+                </h4>
             </Card.Body>
         </Card>
     )

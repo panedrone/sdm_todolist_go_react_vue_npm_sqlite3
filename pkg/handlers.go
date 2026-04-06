@@ -84,14 +84,13 @@ func Listen(myRouter *gin.Engine) {
 		return listen
 	}
 
-	// Сбор данных
 	title := "panedrone's sdm"
-	ginVer := "gin version: v1.11.0" // или gin.Version
+
+	ginVer := "gin version: " + gin.Version
 	goVer := "go sdk: " + runtime.Version()
 	appUrl := fmt.Sprintf("http://%s/", getAppListen())
 	cpuCount := fmt.Sprintf("CPUs: %d", runtime.NumCPU())
 
-	// Функция для идеального центрирования
 	center := func(s string, width int) string {
 		padding := width - len(s)
 		if padding < 0 {
