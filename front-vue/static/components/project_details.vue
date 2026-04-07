@@ -70,7 +70,8 @@ export default {
 </script>
 
 <template>
-  <table v-if="show_project_details">
+  <div class="card" v-if="show_project_details">
+  <table>
     <tr>
       <td>
         <table class="controls">
@@ -142,6 +143,7 @@ export default {
       </td>
     </tr>
   </table>
+  </div>
 </template>
 
 <style scoped>

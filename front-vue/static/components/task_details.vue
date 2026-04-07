@@ -71,7 +71,7 @@ export default {
 </script>
 
 <template>
-  <div v-if="show_task_details">
+  <div class="card" v-if="show_task_details">
     <div class="title" id="subj">
       {{ current_subject }}
     </div>

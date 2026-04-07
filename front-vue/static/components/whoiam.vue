@@ -1,5 +1,5 @@
 <script>
-import Vue from "vue";
+import {version} from "vue";
 
 import fire from "./event_bus";
 import {getText} from "./api";
@@ -23,8 +23,8 @@ export default {
         if (text.includes('sqlx')) {
           this.is_sqlx = true
         }
-        this.value = text + ", npm, vue " + Vue.version
-        document.title = 'SDM Todo, Vue ' + Vue.version
+        this.value = text + ", npm, vue " + version
+        document.title = 'SDM Todo, Vue ' + version
       })
     },
   }

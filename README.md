@@ -17,7 +17,7 @@ A project demonstrating how to use [SQL DAL Maker](https://github.com/panedrone/
 [Part 2](internal/sqlx): using "github.com/jmoiron/sqlx"<br/>
 [Part 3](internal/no_orm): using "database/sql" directly
 
-Front-end is written in both React 18.2.0 and Vue 2.7. Switch in [handlers.go](pkg/handlers.go).
+Front-end is written in both React 18.2.0 and Vue 3.5.32. Switch in [handlers.go](pkg/handlers.go).
 
 ![sdm-todo-app.png](sdm-todo-app.png)
 

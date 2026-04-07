@@ -6,24 +6,17 @@
   "directories": {
   },
   "scripts": {
-    "prod": "webpack --mode production",
-    "dev": "webpack --mode development",
-    "serve": "webpack serve --mode development",
-    "dev-server": "webpack-dev-server --mode development"
+    "prod": "vite build",
+    "dev": "vite build --mode development",
+    "serve": "vite"
   },
   "author": "panedrone",
   "license": "ISC",
   "dependencies": {
-    "vue": "^2.7.16"
+    "vue": "^3"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.6",
-    "@babel/preset-env": "^7.24.6",
-    "babel-loader": "^9.1.3",
-    "vue-loader": "^15.11.1",
-    "vue-template-compiler": "^2.7.16",
-    "webpack": "^5.91.0",
-    "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.0.4"
+    "vite": "^6.3.0",
+    "@vitejs/plugin-vue": "^5"
   }
 }
