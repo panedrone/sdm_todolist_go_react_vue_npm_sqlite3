@@ -20,6 +20,17 @@ func NewNoOrmProjectHandlers() etc.ProjectHandlers {
 	return &projectHandlers{}
 }
 
+// ProjectCreate godoc
+// @Summary Create a new project (No-ORM)
+// @Description Create a new project using raw SQL
+// @Tags projects-no-orm
+// @Accept  json
+// @Produce  json
+// @Param project body request.Project true "Project Name"
+// @Success 201
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /no_orm/projects [post]
 func (h *projectHandlers) ProjectCreate(ctx *gin.Context) {
 	var req request.Project
 	if err := request.BindJSON(ctx, &req); err != nil {
@@ -32,6 +43,14 @@ func (h *projectHandlers) ProjectCreate(ctx *gin.Context) {
 	ctx.Status(http.StatusCreated)
 }
 
+// ProjectsReadAll godoc
+// @Summary Get all projects (No-ORM)
+// @Description Get a list of all projects using raw SQL
+// @Tags projects-no-orm
+// @Produce  json
+// @Success 200 {array} dto.ProjectLi
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /no_orm/projects [get]
 func (h *projectHandlers) ProjectsReadAll(ctx *gin.Context) {
 	all, err := dbal.ReadAll(ctx)
 	if err != nil {
@@ -41,6 +60,17 @@ func (h *projectHandlers) ProjectsReadAll(ctx *gin.Context) {
 	resp.JSON(ctx, http.StatusOK, all)
 }
 
+// ProjectRead godoc
+// @Summary Get a project by ID (No-ORM)
+// @Description Get details of a project by its ID using raw SQL
+// @Tags projects-no-orm
+// @Produce  json
+// @Param p_id path int true "Project ID"
+// @Success 200 {object} dto.Project
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 404 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /no_orm/projects/{p_id} [get]
 func (h *projectHandlers) ProjectRead(ctx *gin.Context) {
 	uri, err := request.BindProjectUri(ctx)
 	if err != nil {
@@ -59,6 +89,18 @@ func (h *projectHandlers) ProjectRead(ctx *gin.Context) {
 
 }
 
+// ProjectUpdate godoc
+// @Summary Update a project (No-ORM)
+// @Description Update an existing project's name by its ID using raw SQL
+// @Tags projects-no-orm
+// @Accept  json
+// @Produce  json
+// @Param p_id path int true "Project ID"
+// @Param project body request.Project true "Project Data"
+// @Success 200
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /no_orm/projects/{p_id} [put]
 func (h *projectHandlers) ProjectUpdate(ctx *gin.Context) {
 	uri, err := request.BindProjectUri(ctx)
 	if err != nil {
@@ -74,6 +116,15 @@ func (h *projectHandlers) ProjectUpdate(ctx *gin.Context) {
 	}
 }
 
+// ProjectDelete godoc
+// @Summary Delete a project (No-ORM)
+// @Description Delete a project by its ID using raw SQL
+// @Tags projects-no-orm
+// @Param p_id path int true "Project ID"
+// @Success 204
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /no_orm/projects/{p_id} [delete]
 func (h *projectHandlers) ProjectDelete(ctx *gin.Context) {
 	uri, err := request.BindProjectUri(ctx)
 	if err != nil {

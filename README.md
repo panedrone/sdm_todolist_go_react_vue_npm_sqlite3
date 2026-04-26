@@ -25,7 +25,8 @@ Front-end is written in both React 18.2.0 and Vue 3.5.32. Switch in [handlers.go
 
 * ported to React 18.2.0
 * mod: for sdm 1.321.2601 "mockable golang dao"
-* add: [unit-tests](internal/sqlx/handlers) of Gin handlers (thank to "mockable golang dao", sqlx only so far) 
+* add: [unit-tests](internal/sqlx/handlers) of Gin handlers for GORM, sqlx and No-ORM (thanks to "mockable golang dao") 
+* add: [Swagger](http://localhost:3301/swagger/index.html) annotations for all handlers
 
 # Docker
 
@@ -90,7 +91,7 @@ sudo docker compose up --build -d
 </sdm>
 ```
 
-# Generated code in action
+# Generated code in action (example)
 
 ```go
 func (h *projectHandlers) ProjectCreate(ctx *gin.Context) {
@@ -112,50 +113,5 @@ func (h *projectHandlers) ProjectsReadAll(ctx *gin.Context) {
 		return
 	}
 	resp.JSON(ctx, http.StatusOK, all)
-}
-
-func (h *projectHandlers) ProjectRead(ctx *gin.Context) {
-	uri, err := request.BindProjectUri(ctx)
-	if err != nil {
-		return
-	}
-	pr, err := dbal.ReadProject(ctx, uri.PId)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			resp.Abort404NotFound(ctx, err)
-			return
-		}
-		resp.Abort500(ctx, err)
-		return
-	}
-	resp.JSON(ctx, http.StatusOK, pr)
-
-}
-
-func (h *projectHandlers) ProjectUpdate(ctx *gin.Context) {
-	uri, err := request.BindProjectUri(ctx)
-	if err != nil {
-		return
-	}
-	var req request.Project
-	if err := request.BindJSON(ctx, &req); err != nil {
-		return
-	}
-	pr := &dto.Project{PID: uri.PId, PName: req.PName}
-	if _, err := dbal.UpdateProject(ctx, pr); err != nil {
-		resp.Abort500(ctx, err)
-	}
-}
-
-func (h *projectHandlers) ProjectDelete(ctx *gin.Context) {
-	uri, err := request.BindProjectUri(ctx)
-	if err != nil {
-		return
-	}
-	if _, err := dbal.DeleteProject(ctx, &dto.Project{PID: uri.PId}); err != nil {
-		resp.Abort500(ctx, err)
-		return
-	}
-	ctx.Status(http.StatusNoContent)
 }
 ```

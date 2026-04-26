@@ -22,6 +22,18 @@ func NewGormTaskHandlers() etc.TaskHandlers {
 	return &taskHandlers{}
 }
 
+// TaskCreate godoc
+// @Summary Create a new task
+// @Description Create a new task for a specific project
+// @Tags tasks
+// @Accept  json
+// @Produce  json
+// @Param p_id path int true "Project ID"
+// @Param task body request.NewTask true "Task Subject"
+// @Success 201
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /projects/{p_id}/tasks [post]
 func (h *taskHandlers) TaskCreate(ctx *gin.Context) {
 	uri, err := request.BindProjectUri(ctx)
 	if err != nil {
@@ -43,6 +55,17 @@ func (h *taskHandlers) TaskCreate(ctx *gin.Context) {
 	ctx.Status(http.StatusCreated)
 }
 
+// TaskRead godoc
+// @Summary Get a task by ID
+// @Description Get details of a task by its ID
+// @Tags tasks
+// @Produce  json
+// @Param t_id path int true "Task ID"
+// @Success 200 {object} models.Task
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 404 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /tasks/{t_id} [get]
 func (h *taskHandlers) TaskRead(ctx *gin.Context) {
 	uri, err := request.BindTaskUri(ctx)
 	if err != nil {
@@ -60,6 +83,16 @@ func (h *taskHandlers) TaskRead(ctx *gin.Context) {
 	resp.JSON(ctx, http.StatusOK, task)
 }
 
+// TasksReadByProject godoc
+// @Summary Get tasks by project
+// @Description Get all tasks associated with a specific project
+// @Tags tasks
+// @Produce  json
+// @Param p_id path int true "Project ID"
+// @Success 200 {array} models.Task
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /projects/{p_id}/tasks [get]
 func (h *taskHandlers) TasksReadByProject(ctx *gin.Context) {
 	uri, err := request.BindProjectUri(ctx)
 	if err != nil {
@@ -74,6 +107,18 @@ func (h *taskHandlers) TasksReadByProject(ctx *gin.Context) {
 	resp.JSON(ctx, http.StatusOK, tasks)
 }
 
+// TaskUpdate godoc
+// @Summary Update a task
+// @Description Update an existing task's details by its ID
+// @Tags tasks
+// @Accept  json
+// @Produce  json
+// @Param t_id path int true "Task ID"
+// @Param task body models.Task true "Task Data"
+// @Success 200
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /tasks/{t_id} [put]
 func (h *taskHandlers) TaskUpdate(ctx *gin.Context) {
 	uri, err := request.BindTaskUri(ctx)
 	if err != nil {
@@ -118,6 +163,15 @@ func (h *taskHandlers) TaskUpdate(ctx *gin.Context) {
 	}
 }
 
+// TaskDelete godoc
+// @Summary Delete a task
+// @Description Delete a task by its ID
+// @Tags tasks
+// @Param t_id path int true "Task ID"
+// @Success 204
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /tasks/{t_id} [delete]
 func (h *taskHandlers) TaskDelete(ctx *gin.Context) {
 	uri, err := request.BindTaskUri(ctx)
 	if err != nil {
