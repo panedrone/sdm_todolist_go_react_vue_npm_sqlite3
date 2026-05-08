@@ -73,11 +73,6 @@ sudo docker compose up --build -d
         </custom>
     </dto-class>
 
-    <dto-class name="TaskLi" ref="tasks">
-        <field type="-" column="p_id"/>
-        <field type="-" column="t_comments"/>
-    </dto-class>
-
     <dao-class name="ProjectsDao">
         <crud dto="Project"/>
         <query-dto-list method="ReadAll" dto="ProjectLi" ref="get_projects.sql"/>
@@ -94,24 +89,26 @@ sudo docker compose up --build -d
 # Generated code in action (example)
 
 ```go
-func (h *projectHandlers) ProjectCreate(ctx *gin.Context) {
-	var req request.Project
-	if err := request.BindJSON(ctx, &req); err != nil {
-		return
-	}
-	if err := dbal.CreateProject(ctx, &dto.Project{PName: req.PName}); err != nil {
-		resp.Abort500(ctx, err)
-		return
-	}
-	ctx.Status(http.StatusCreated)
-}
+// Projects
+dbal.CreateProject(ctx, &m.Project{PName: req.PName})
 
-func (h *projectHandlers) ProjectsReadAll(ctx *gin.Context) {
-	all, err := dbal.ReadAll(ctx)
-	if err != nil {
-		resp.Abort500(ctx, err)
-		return
-	}
-	resp.JSON(ctx, http.StatusOK, all)
-}
+all, err := dbal.ReadAll(ctx)
+
+pr, err := dbal.ReadProject(ctx, uri.PId)
+
+_, err := dbal.UpdateProject(ctx, pr)
+
+_, err := dbal.DeleteProject(ctx, &m.Project{PID: uri.PId})
+
+
+// Tasks
+dbal.CreateTask(ctx, &t)
+
+task, err := dbal.ReadTask(ctx, uri.TId)
+
+tasks, err := dbal.ReadProjectTasks(ctx, uri.PId)
+
+_, err = dbal.UpdateTask(ctx, t)
+
+_, err := dbal.DeleteTask(ctx, &models.Task{TID: uri.TId})
 ```
