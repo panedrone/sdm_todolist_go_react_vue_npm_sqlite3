@@ -1,6 +1,10 @@
+--- sdm
+
 internal/gorm/sdm/go.dal
 internal/no_orm/sdm/go.dal
 internal/sqlx/sdm/go.dal
+
+--- etc
 
 README.md
 docker-compose.yml

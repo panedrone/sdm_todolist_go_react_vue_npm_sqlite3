@@ -8,7 +8,7 @@ WORKDIR /usr/local/src
 COPY ["go.mod","go.sum","./"]
 RUN go mod download
 COPY ./ ./
-RUN go build -gcflags "-N -l" -o main sqlx/main_sqlx.go
+RUN go build -o main cmd/sqlx/main_sqlx.go
 
 # --- https://github.com/GoogleCloudPlatform/golang-samples/blob/main/appengine/go11x/tasks/handle_task/Dockerfile
 # Use a Docker multi-stage build to create a lean production image.
