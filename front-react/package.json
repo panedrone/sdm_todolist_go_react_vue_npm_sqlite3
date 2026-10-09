@@ -10,8 +10,8 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "vite": "^6.3.0",
-    "@vitejs/plugin-react": "^4.4.1"
+    "vite": "8.0.16",
+    "@vitejs/plugin-react": "^6.1.2"
   },
   "dependencies": {
     "bootstrap": "^5.3.3",
@@ -20,7 +20,6 @@
     "react-apexcharts": "^1.9.0",
     "react-bootstrap": "^2.10.7",
     "react-calendar": "^5.1.0",
-    "react-chartjs-2": "^5.3.1",
     "react-datetime-picker": "^6.0.1",
     "react-dom": "^18.2.0",
     "react-material-symbols": "^4.4.0",

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Form from "react-bootstrap/Form";
+import {Button, ButtonGroup, InputGroup} from "react-bootstrap";
 
 export const StringField = ({onChange, saveUpdater}) => {
 
@@ -91,19 +92,21 @@ export const IntegerField = ({onChange, saveUpdater, min = 1, max = 10}) => {
     //     </label>
     // )
 
+    const spinStyle = {padding: "0 6px", lineHeight: 1, fontSize: "0.7em"}
+
     return (
-        <div style={{display: "flex"}}>
-            <input type="text" min={min} max={max} pattern="[0-9\s]"
-                   ref={refDom} placeholder="Type a number..." onChange={handleChange} style={{flex: 1}}/>
-            <div>
-                <button style={{padding: 0, margin: 1, display: "block", lineHeight: "0.7em"}} onClick={handleUp}>
-                    &#x25B4;
-                </button>
-                <button style={{padding: 0, margin: 1, display: "block", lineHeight: "0.7em"}} onClick={handleDown}>
-                    &#x25BE;
-                </button>
-            </div>
-        </div>
+        <InputGroup size="sm">
+            <Form.Control type="text" pattern="[0-9\s]"
+                          ref={refDom} placeholder="Type a number..." onChange={handleChange}/>
+            <ButtonGroup vertical>
+                <Button type="button" variant="outline-secondary" style={spinStyle} onClick={handleUp}>
+                    <i className="bi bi-caret-up-fill"/>
+                </Button>
+                <Button type="button" variant="outline-secondary" style={spinStyle} onClick={handleDown}>
+                    <i className="bi bi-caret-down-fill"/>
+                </Button>
+            </ButtonGroup>
+        </InputGroup>
     )
 }
 

@@ -1,4 +1,4 @@
-import {defineConfig, transformWithEsbuild} from 'vite'
+import {defineConfig, transformWithOxc} from 'vite'
 import react from '@vitejs/plugin-react'
 
 const jsxInJs = {
@@ -6,19 +6,20 @@ const jsxInJs = {
     enforce: 'pre',
     async transform(code, id) {
         if (!/node_modules/.test(id) && /\.js$/.test(id)) {
-            return transformWithEsbuild(code, id, {loader: 'jsx'})
+            return transformWithOxc(code, id, {lang: 'jsx'})
         }
     },
 }
 
 export default defineConfig({
     plugins: [jsxInJs, react()],
-    optimizeDeps: {esbuild: {loader: {'.js': 'jsx'}}},
+    optimizeDeps: {rolldownOptions: {moduleTypes: {'.js': 'jsx'}}},
+    base: './',
     publicDir: false,
     build: {
         outDir: 'static/dist',
         manifest: true,
-        rollupOptions: {
+        rolldownOptions: {
             input: 'static/App.js',
             output: {
                 entryFileNames: 'assets/[name].js',
