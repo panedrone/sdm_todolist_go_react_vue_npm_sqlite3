@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdm xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="sdm.xsd">
+
+    <dto-class name="Project" ref="projects"/>
+
+    <dto-class name="ProjectLi" ref="projects">
+
+        <header>// ProjectLi `project` list item: [+] p_tasks_count</header>
+
+        <field type="int64${json}" column="p_tasks_count"/>
+
+    </dto-class>
+
+    <dto-class name="Task" ref="tasks">
+        <custom>
+            TID // PK
+            PID // FK ref. column -> Project
+        </custom>
+    </dto-class>
+
+    <dto-class name="TaskLi" ref="tasks">
+
+        <header>// TaskLi `task` list item: [-] p_id, [-] t_comments</header>
+
+        <field type="-" column="p_id"/>
+        <field type="-" column="t_comments"/>
+
+    </dto-class>
+
+    <dao-class name="ProjectsDao" ref="dao_projects.xml"/>
+
+    <dao-class name="TasksDao" ref="dao_tasks.xml"/>
+
+</sdm>

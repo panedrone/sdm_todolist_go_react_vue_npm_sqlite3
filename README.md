@@ -10,7 +10,6 @@
 └───────────────────────────────────────────────────┘
 ```
 
-
 A project demonstrating how to use [SQL DAL Maker](https://github.com/panedrone/sqldalmaker) + Golang.
 
 [Part 1](internal/gorm): using "github.com/go-gorm/gorm"<br/>
@@ -23,10 +22,11 @@ Front-end is written in both React 18.2.0 and Vue 3.5.32. Switch in [handlers.go
 
 # News
 
-* ported to React 18.2.0
-* mod: for sdm 1.321.2601 "mockable golang dao"
-* add: [unit-tests](internal/sqlx/handlers) of Gin handlers for GORM, sqlx and No-ORM (thanks to "mockable golang dao") 
-* add: [Swagger](http://localhost:3301/swagger/index.html) annotations for all handlers
+* feat: [go-sdm](https://github.com/panedrone/go-sdm)
+* feat: ported to React 18.2.0
+* feat: for sdm 1.321.2601 "mockable golang dao"
+* feat: [unit-tests](internal/sqlx/handlers) of Gin handlers for GORM, sqlx and No-ORM (thanks to "mockable golang dao") 
+* feat: [Swagger](http://localhost:3301/swagger/index.html) annotations for all handlers
 
 # Docker
 

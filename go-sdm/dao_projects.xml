@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dao-class xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation="dao.xsd">
+
+    <crud dto="Project">
+        <create/>
+        <read/>
+        <update/>
+        <delete/>
+    </crud>
+
+    <query-dto-list method="ReadAll" dto="ProjectLi" ref="get_projects.sql"/>
+
+    <!-- testing -->
+
+    <query-list method="GetProjectIds" return-type="int64" ref="get_projects.sql"/>
+
+    <!-- testing -->
+
+    <query-list method="GetProjectId" return-type="int64" ref="get_projects.sql"/> <!-- PASS -->
+
+    <query method="PId" return-type="int64" ref="select * from projects"/> <!-- PASS -->
+
+    <query method="ProjectId(p_id)" return-type="int64" ref="select * from projects where p_id=?"/> <!-- PASS -->
+
+    <!-- sql-shortcut -->
+
+    <query-list method="GetPIds(p_id)" return-type="int64" ref="projects(p_id)"/>
+
+    <!-- sql-shortcut -->
+
+    <query method="GetPId(p_id)" return-type="int64" ref="projects(p_id)"/>
+
+</dao-class>

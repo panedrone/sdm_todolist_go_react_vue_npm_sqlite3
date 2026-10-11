@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dao-class xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation="dao.xsd">
+
+    <crud table="tasks" dto="Task"/>
+
+    <query-dto-list method="ReadByProject(int64 pId)" ref="get_project_tasks.sql" dto="TaskLi"/>
+
+    <exec-dml method="DelByProject(pId)" ref="delete_project_tasks.sql"/>
+
+    <!-- testing -->
+
+    <query method="GetCount()" ref="select count(*) from tasks" return-type="int64"/>
+
+    <!-- testing -->
+
+    <query-dto-list dto="TaskLi" method="GetProjectTasks2(g_id)" ref="delete_project_tasks.sql"/>
+
+    <!-- testing -->
+
+    <query-dto dto="Task" method="GetTask(g_id)" ref="delete_project_tasks.sql"/>
+
+</dao-class>
