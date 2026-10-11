@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"sdm_demo_todolist/internal/no_orm/dbal"
-	"sdm_demo_todolist/internal/no_orm/dbal/dto"
+	"sdm_demo_todolist/internal/dbal"
+	"sdm_demo_todolist/internal/dbal/models"
 	"sdm_demo_todolist/internal/no_orm/handlers"
 	"strings"
 	"testing"
@@ -35,27 +35,27 @@ func TestMain(m *testing.M) {
 		dbal.DeleteProject = origDelete
 	}()
 
-	dbal.CreateProject = func(ctx context.Context, item *dto.Project) error {
+	dbal.CreateProject = func(ctx context.Context, item *models.Project) error {
 		item.PID = 1
 		return nil
 	}
 
-	dbal.ReadAll = func(ctx context.Context) ([]*dto.ProjectLi, error) {
-		return []*dto.ProjectLi{
+	dbal.ReadAll = func(ctx context.Context) ([]*models.ProjectLi, error) {
+		return []*models.ProjectLi{
 			{PID: 1, PName: "p1", PTasksCount: 0},
 			{PID: 2, PName: "p2", PTasksCount: 5},
 		}, nil
 	}
 
-	dbal.ReadProject = func(ctx context.Context, id int64) (*dto.Project, error) {
-		return &dto.Project{PID: id, PName: "demo"}, nil
+	dbal.ReadProject = func(ctx context.Context, id int64) (*models.Project, error) {
+		return &models.Project{PID: id, PName: "demo"}, nil
 	}
 
-	dbal.UpdateProject = func(ctx context.Context, item *dto.Project) (int64, error) {
+	dbal.UpdateProject = func(ctx context.Context, item *models.Project) (int64, error) {
 		return 1, nil
 	}
 
-	dbal.DeleteProject = func(ctx context.Context, item *dto.Project) (int64, error) {
+	dbal.DeleteProject = func(ctx context.Context, item *models.Project) (int64, error) {
 		return 1, nil
 	}
 
@@ -110,7 +110,7 @@ func TestProjectRead_NotFound(t *testing.T) {
 	orig := dbal.ReadProject
 	defer func() { dbal.ReadProject = orig }()
 
-	dbal.ReadProject = func(ctx context.Context, id int64) (*dto.Project, error) {
+	dbal.ReadProject = func(ctx context.Context, id int64) (*models.Project, error) {
 		return nil, sql.ErrNoRows
 	}
 

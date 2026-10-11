@@ -29,3 +29,11 @@ func init() {
 		return _ds
 	}
 }
+
+func OpenDB() error {
+	return _ds.Open()
+}
+
+func CloseDB() error {
+	return _ds.db.Close()
+}

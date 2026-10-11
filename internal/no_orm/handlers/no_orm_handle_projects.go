@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
-	"sdm_demo_todolist/internal/no_orm/dbal"
-	"sdm_demo_todolist/internal/no_orm/dbal/dto"
+	"sdm_demo_todolist/internal/dbal"
+	"sdm_demo_todolist/internal/dbal/models"
 	"sdm_demo_todolist/pkg"
 	"sdm_demo_todolist/pkg/request"
 	"sdm_demo_todolist/pkg/resp"
@@ -36,7 +36,7 @@ func (h *projectHandlers) ProjectCreate(ctx *gin.Context) {
 	if err := request.BindJSON(ctx, &req); err != nil {
 		return
 	}
-	if err := dbal.CreateProject(ctx, &dto.Project{PName: req.PName}); err != nil {
+	if err := dbal.CreateProject(ctx, &models.Project{PName: req.PName}); err != nil {
 		resp.Abort500(ctx, err)
 		return
 	}
@@ -48,7 +48,7 @@ func (h *projectHandlers) ProjectCreate(ctx *gin.Context) {
 // @Description Get a list of all projects using raw SQL
 // @Tags projects-no-orm
 // @Produce  json
-// @Success 200 {array} dto.ProjectLi
+// @Success 200 {array} models.ProjectLi
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /no_orm/projects [get]
 func (h *projectHandlers) ProjectsReadAll(ctx *gin.Context) {
@@ -66,7 +66,7 @@ func (h *projectHandlers) ProjectsReadAll(ctx *gin.Context) {
 // @Tags projects-no-orm
 // @Produce  json
 // @Param p_id path int true "Project ID"
-// @Success 200 {object} dto.Project
+// @Success 200 {object} models.Project
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 404 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -110,7 +110,7 @@ func (h *projectHandlers) ProjectUpdate(ctx *gin.Context) {
 	if err := request.BindJSON(ctx, &req); err != nil {
 		return
 	}
-	pr := &dto.Project{PID: uri.PId, PName: req.PName}
+	pr := &models.Project{PID: uri.PId, PName: req.PName}
 	if _, err := dbal.UpdateProject(ctx, pr); err != nil {
 		resp.Abort500(ctx, err)
 	}
@@ -130,7 +130,7 @@ func (h *projectHandlers) ProjectDelete(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	if _, err := dbal.DeleteProject(ctx, &dto.Project{PID: uri.PId}); err != nil {
+	if _, err := dbal.DeleteProject(ctx, &models.Project{PID: uri.PId}); err != nil {
 		resp.Abort500(ctx, err)
 		return
 	}

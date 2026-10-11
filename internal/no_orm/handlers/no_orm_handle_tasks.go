@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"sdm_demo_todolist/internal/no_orm/dbal"
-	"sdm_demo_todolist/internal/no_orm/dbal/dto"
+	"sdm_demo_todolist/internal/dbal"
+	"sdm_demo_todolist/internal/dbal/models"
 	"sdm_demo_todolist/pkg"
 	"sdm_demo_todolist/pkg/datetime"
 	"sdm_demo_todolist/pkg/request"
@@ -44,7 +44,7 @@ func (h *taskHandlers) TaskCreate(ctx *gin.Context) {
 		resp.Abort400hBadRequest(ctx, err.Error())
 		return
 	}
-	t := dto.Task{}
+	t := models.Task{}
 	t.PID = uri.PId
 	t.TSubject = inTask.TSubject
 	t.TPriority = 1
@@ -62,7 +62,7 @@ func (h *taskHandlers) TaskCreate(ctx *gin.Context) {
 // @Tags tasks-no-orm
 // @Produce  json
 // @Param p_id path int true "Project ID"
-// @Success 200 {array} dto.TaskLi
+// @Success 200 {array} models.TaskLi
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /no_orm/projects/{p_id}/tasks [get]
@@ -85,7 +85,7 @@ func (h *taskHandlers) TasksReadByProject(ctx *gin.Context) {
 // @Tags tasks-no-orm
 // @Produce  json
 // @Param t_id path int true "Task ID"
-// @Success 200 {object} dto.Task
+// @Success 200 {object} models.Task
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 404 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -114,7 +114,7 @@ func (h *taskHandlers) TaskRead(ctx *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param t_id path int true "Task ID"
-// @Param task body dto.Task true "Task Data"
+// @Param task body models.Task true "Task Data"
 // @Success 200
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -129,7 +129,7 @@ func (h *taskHandlers) TaskUpdate(ctx *gin.Context) {
 		resp.Abort404NotFound(ctx, err)
 		return
 	}
-	var req dto.Task
+	var req models.Task
 	if err := request.BindJSON(ctx, &req); err != nil {
 		return
 	}
@@ -177,7 +177,7 @@ func (h *taskHandlers) TaskDelete(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	t := dto.Task{TID: uri.TId}
+	t := models.Task{TID: uri.TId}
 	if _, err := dbal.DeleteTask(ctx, &t); err != nil {
 		resp.Abort500(ctx, err)
 		return
