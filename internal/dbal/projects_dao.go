@@ -104,7 +104,7 @@ var PID = func(ctx context.Context) (res int64, err error) {
 	return
 }
 
-var ProjectID = func(ctx context.Context, pID interface{}) (res int64, err error) {
+var ProjectID = func(ctx context.Context, pID string) (res int64, err error) {
 	ds := DS(ctx)
 	sql := `select * from projects where p_id=?`
 	err = ds.Query(ctx, sql, &res, pID)

@@ -103,7 +103,7 @@ var ReadByProject = func(ctx context.Context, pID int64) (res []*models.TaskLi, 
 	return
 }
 
-var DelByProject = func(ctx context.Context, pID interface{}) (rowsAffected int64, err error) {
+var DelByProject = func(ctx context.Context, pID string) (rowsAffected int64, err error) {
 	ds := DS(ctx)
 	sql := `delete from tasks where p_id=?`
 	rowsAffected, err = ds.Exec(ctx, sql, pID)
@@ -117,7 +117,7 @@ var GetCount = func(ctx context.Context) (res int64, err error) {
 	return
 }
 
-var GetProjectTasks2 = func(ctx context.Context, gID interface{}) (res []*models.TaskLi, err error) {
+var GetProjectTasks2 = func(ctx context.Context, gID string) (res []*models.TaskLi, err error) {
 	ds := DS(ctx)
 	sql := `delete from tasks where p_id=?`
 	errMap := make(map[string]int)
@@ -136,7 +136,7 @@ var GetProjectTasks2 = func(ctx context.Context, gID interface{}) (res []*models
 	return
 }
 
-var GetTask = func(ctx context.Context, gID interface{}) (*models.Task, error) {
+var GetTask = func(ctx context.Context, gID string) (*models.Task, error) {
 	ds := DS(ctx)
 	sql := `delete from tasks where p_id=?`
 	row, err := ds.QueryRow(ctx, sql, gID)

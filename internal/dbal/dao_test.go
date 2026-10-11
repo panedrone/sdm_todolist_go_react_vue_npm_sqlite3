@@ -6,6 +6,7 @@ package dbal
 import (
 	"context"
 	"os"
+	"strconv"
 	"testing"
 
 	"sdm_demo_todolist/internal/dbal/models"
@@ -60,11 +61,13 @@ func one(t *testing.T, what string, x res[int64]) {
 }
 
 // Тесты зависят друг от друга по данным, поэтому — один сценарий по шагам.
+// Параметры без типа в XML (pId, g_id) — string: в type-map ключ java.lang.String для плагина,
+// а xerial сообщает тип параметров SQLite именно так.
 func TestTodolist(t *testing.T) {
 	// projects — с чистого листа (внутри транзакции): запросы скаляров ниже ждут одну строку.
 	// Задачи остаются (среди них есть и без проекта), счёт — от base.
 	for _, p := range must(t, "ReadAll", r(ReadAll(ctx))) {
-		must(t, "DelByProject", r(DelByProject(ctx, p.PID)))
+		must(t, "DelByProject", r(DelByProject(ctx, strconv.FormatInt(p.PID, 10))))
 		one(t, "DeleteProject", r(DeleteProject(ctx, &models.Project{PID: p.PID})))
 	}
 	base := must(t, "GetCount", r(GetCount(ctx)))
@@ -85,7 +88,7 @@ func TestTodolist(t *testing.T) {
 	if id := must(t, "PID", r(PID(ctx))); id != p.PID {
 		t.Errorf("PID: %d", id)
 	}
-	if id := must(t, "ProjectID", r(ProjectID(ctx, p.PID))); id != p.PID {
+	if id := must(t, "ProjectID", r(ProjectID(ctx, strconv.FormatInt(p.PID, 10)))); id != p.PID {
 		t.Errorf("ProjectID: %d", id)
 	}
 	if id := must(t, "GetPID", r(GetPID(ctx, p.PID))); id != p.PID {
@@ -137,18 +140,18 @@ func TestTodolist(t *testing.T) {
 
 	// "testing" в dao_tasks.xml: запросы на delete_project_tasks.sql — строк не возвращают,
 	// но delete выполняют
-	if list := must(t, "GetProjectTasks2", r(GetProjectTasks2(ctx, p.PID))); len(list) != 0 {
+	if list := must(t, "GetProjectTasks2", r(GetProjectTasks2(ctx, strconv.FormatInt(p.PID, 10)))); len(list) != 0 {
 		t.Errorf("GetProjectTasks2: %+v", list)
 	}
 	if n := must(t, "GetCount", r(GetCount(ctx))); n != base {
 		t.Errorf("GetCount after GetProjectTasks2: %d, base %d", n, base)
 	}
-	if _, err := GetTask(ctx, p.PID); err == nil {
+	if _, err := GetTask(ctx, strconv.FormatInt(p.PID, 10)); err == nil {
 		t.Error("GetTask: no rows, error expected")
 	}
 
 	noErr(t, "CreateTask", CreateTask(ctx, task))
-	if n := must(t, "DelByProject", r(DelByProject(ctx, p.PID))); n != 1 {
+	if n := must(t, "DelByProject", r(DelByProject(ctx, strconv.FormatInt(p.PID, 10)))); n != 1 {
 		t.Errorf("DelByProject: %d", n)
 	}
 	one(t, "DeleteProject", r(DeleteProject(ctx, p)))
