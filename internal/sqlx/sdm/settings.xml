@@ -65,7 +65,7 @@
         <type detected="sqlx-java.lang.String" target="string${json-sqlx} -> SetString"/>
         <type detected="sqlx-java.util.Date" target="time:time.Time${json-sqlx} -> SetTime"/>
         <type detected="sqlx-byte[]" target="byte[]${json-sqlx} -> SetBytes"/>
-        <type detected="sqlx-java.lang.Object" target="interface{}${json-sqlx}"/>
+        <type detected="sqlx-java.lang.Object" target="any${json-sqlx}"/>
 
         <type detected="java.lang.Integer" target="int64${json} -> SetInt64"/>
         <type detected="java.lang.Float" target="float32${json} -> SetFloat32"/>
@@ -73,7 +73,7 @@
         <type detected="java.lang.String" target="string${json} -> SetString"/>
         <type detected="java.util.Date" target="time:time.Time${json} -> SetTime"/>
         <type detected="byte[]" target="[]byte${json} -> SetBytes"/>
-        <type detected="java.lang.Object" target="interface{}${json}"/>
+        <type detected="java.lang.Object" target="any${json}"/>
 
         <!-- mysql, postgres, sql server  -->
 
@@ -98,7 +98,7 @@
         <!--        <type detected="sqlx-java.util.Date" target="time:time.Time${json-sqlx} -> SetTime"/>-->
         <!--        <type detected="sqlx-java.time.LocalDateTime" target="time:time.Time${json-sqlx} -> SetTime"/>-->
 
-        <!--        <type detected="sqlx-java.lang.Object" target="interface{}${json-sqlx}"/>-->
+        <!--        <type detected="sqlx-java.lang.Object" target="any${json-sqlx}"/>-->
 
         <!--        <type detected="java.util.UUID" target="github.com/google/uuid:uuid.UUID${json} -> SetUUID"/>-->
         <!--        <type detected="java.sql.Array" target="[]string${json}"/>-->
@@ -118,7 +118,7 @@
         <!--        <type detected="java.util.Date" target="time:time.Time${json} -> SetTime"/>-->
         <!--        <type detected="java.time.LocalDateTime" target="time:time.Time${json} -> SetTime"/>-->
 
-        <!--        <type detected="java.lang.Object" target="interface{}${json}"/>-->
+        <!--        <type detected="java.lang.Object" target="any${json}"/>-->
 
         <!--        <type detected="java.sql.ResultSet" target="string"/> &lt;!&ndash; PG cursor param &ndash;&gt;-->
 
@@ -137,7 +137,7 @@
         <!--        <type detected="sqlx-byte[]" target="string${json-sqlx}"/>-->
         <!--        <type detected="sqlx-java.lang.Boolean" target="int64${json-sqlx} -> SetBool"/>-->
 
-        <!--        <type detected="sqlx-java.lang.Object" target="interface{}${json-sqlx}"/>-->
+        <!--        <type detected="sqlx-java.lang.Object" target="any${json-sqlx}"/>-->
 
         <!--        <type detected="java.lang.Double" target="float64${json} -> SetFloat64"/>-->
         <!--        <type detected="java.math.BigDecimal" target="github.com/godror/godror:godror.Number${json} -> SetNum"/>-->
@@ -151,7 +151,7 @@
         <!--        <type detected="byte[]" target="string${json}"/>-->
         <!--        <type detected="java.lang.Boolean" target="int64${json} -> SetBool"/>-->
 
-        <!--        <type detected="java.lang.Object" target="interface{}${json}"/>-->
+        <!--        <type detected="java.lang.Object" target="any${json}"/>-->
 
     </type-map>
 

@@ -26,6 +26,7 @@ func TestMain(m *testing.M) {
 	origUpdate := dbal.UpdateTask
 	origDelete := dbal.DeleteTask
 	origReadProjectTasks := dbal.ReadProjectTasks
+	origRawProjectTasks := dbal.RawProjectTasks
 
 	defer func() {
 		dbal.CreateTask = origCreate
@@ -33,6 +34,8 @@ func TestMain(m *testing.M) {
 		dbal.UpdateTask = origUpdate
 		dbal.DeleteTask = origDelete
 		dbal.ReadProjectTasks = origReadProjectTasks
+
+		dbal.RawProjectTasks = origRawProjectTasks
 	}()
 
 	dbal.CreateTask = func(ctx context.Context, t *models.Task) error {
@@ -64,6 +67,7 @@ func TestMain(m *testing.M) {
 			{TID: 2, TSubject: "t2"},
 		}, nil
 	}
+	dbal.RawProjectTasks = dbal.ReadProjectTasks
 
 	h := handlers.NewGormTaskHandlers()
 

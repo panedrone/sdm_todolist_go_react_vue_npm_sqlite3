@@ -17,9 +17,9 @@
 
          field-assign-mode:
             0 - by column name (database/sql, gorm)
-            1 - by field position
-            2 - ptr to DTO or ptr to slice of DTO-s (sqlx)
-            3 - ptr to resulting slice of DTO-s (sqlx) -->
+            1 - by field position (unsafe)
+            2 - ptr to DTO or ptr to slice of DTO-s (gorm, sqlx)
+            3 - ptr to resulting slice of DTO-s (gorm, sqlx) -->
 
     <dao scope="internal/dbal" field-assign-mode="0" macro=""/>
 
@@ -60,7 +60,7 @@
         <type detected="java.lang.Double" target="float64${json} -> SetFloat64"/>
         <type detected="java.lang.String" target="string${json} -> SetString"/>
         <type detected="byte[]" target="[]byte${json} -> SetBytes"/>
-        <type detected="java.lang.Object" target="interface{}${json}"/>
+        <type detected="java.lang.Object" target="any${json}"/>
 
         <!-- database/sql (no ORM) -->
 
@@ -101,7 +101,7 @@
         <type detected="DATE" target="time:time.Time${json} -> SetTime"/>
         <type detected="DATETIME" target="time:time.Time${json} -> SetTime"/>
         <type detected="TIMESTAMP" target="time:time.Time${json} -> SetTime"/>
-        <type detected="unknown" target="interface{}${json}"/>
+        <type detected="unknown" target="any${json}"/>
 
         <!-- sqlx -->
 
@@ -142,7 +142,7 @@
         <type detected="sqlx-DATE" target="time:time.Time${json-sqlx} -> SetTime"/>
         <type detected="sqlx-DATETIME" target="time:time.Time${json-sqlx} -> SetTime"/>
         <type detected="sqlx-TIMESTAMP" target="time:time.Time${json-sqlx} -> SetTime"/>
-        <type detected="sqlx-unknown" target="interface{}${json-sqlx}"/>
+        <type detected="sqlx-unknown" target="any${json-sqlx}"/>
 
         <!-- gorm -->
 
@@ -183,7 +183,7 @@
         <type detected="gorm-DATE" target="${json-gorm-time}"/>
         <type detected="gorm-DATETIME" target="${json-gorm-time}"/>
         <type detected="gorm-TIMESTAMP" target="${json-gorm-time}"/>
-        <type detected="gorm-unknown" target="interface{}${json-gorm}"/>
+        <type detected="gorm-unknown" target="any${json-gorm}"/>
 
     </type-map>
 

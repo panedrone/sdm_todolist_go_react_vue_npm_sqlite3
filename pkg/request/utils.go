@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//func BindUri(ctx *gin.Context, uri interface{}) error {
+//func BindUri(ctx *gin.Context, uri any) error {
 //	if err := ctx.ShouldBindUri(uri); err != nil {
 //		resp.Abort400BadUri(ctx, err)
 //		return err
@@ -14,7 +14,7 @@ import (
 //	return nil
 //}
 
-func BindJSON(ctx *gin.Context, req interface{}) error {
+func BindJSON(ctx *gin.Context, req any) error {
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		resp.Abort400BadJson(ctx, err)
 		return err

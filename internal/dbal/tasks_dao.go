@@ -85,7 +85,7 @@ var DeleteTask = func(ctx context.Context, item *models.Task) (rowsAffected int6
 
 var ReadByProject = func(ctx context.Context, pID int64) (res []*models.TaskLi, err error) {
 	ds := DS(ctx)
-	sql := `select t_id, t_priority, t_date, t_subject from tasks where p_id =? 
+	sql := `select t_id, p_id, t_priority, t_date, t_subject from tasks where p_id =? 
 		order by t_id`
 	errMap := make(map[string]int)
 	_onRow := func(row map[string]interface{}) {

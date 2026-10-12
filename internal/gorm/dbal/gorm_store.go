@@ -48,22 +48,22 @@ type DataStore interface {
 
 	// CRUD
 
-	Create(ctx context.Context, table string, dataObjRef interface{}) error
-	ReadAll(ctx context.Context, table string, sliceOfDataObjRef interface{}) error
-	Read(ctx context.Context, table string, dataObjRef interface{}, pk ...interface{}) error
-	Update(ctx context.Context, table string, dataObjRef interface{}) (rowsAffected int64, err error)
-	Delete(ctx context.Context, table string, dataObjRef interface{}) (rowsAffected int64, err error)
+	Create(ctx context.Context, table string, dataObjRef any) error
+	ReadAll(ctx context.Context, table string, sliceOfDataObjRef any) error
+	Read(ctx context.Context, table string, dataObjRef any, pk ...any) error
+	Update(ctx context.Context, table string, dataObjRef any) (rowsAffected int64, err error)
+	Delete(ctx context.Context, table string, dataObjRef any) (rowsAffected int64, err error)
 
 	// raw-SQL
 
-	Exec(ctx context.Context, sqlString string, args ...interface{}) (res int64, err error)
+	Exec(ctx context.Context, sqlString string, args ...any) (res int64, err error)
 
-	Query(ctx context.Context, sqlString string, destPtr interface{}, args ...interface{}) error
-	QueryAll(ctx context.Context, sqlString string, destSlicePtr interface{}, args ...interface{}) error
-	QueryRow(ctx context.Context, sqlString string, args ...interface{}) (data map[string]interface{}, err error)
-	QueryAllRows(ctx context.Context, sqlString string, onRow func(map[string]interface{}), args ...interface{}) error
+	Query(ctx context.Context, sqlString string, destPtr any, args ...any) error
+	QueryAll(ctx context.Context, sqlString string, destSlicePtr any, args ...any) error
+	QueryRow(ctx context.Context, sqlString string, args ...any) (data map[string]any, err error)
+	QueryAllRows(ctx context.Context, sqlString string, onRow func(map[string]any), args ...any) error
 
-	Select(ctx context.Context, sqlString string, fa interface{}, args ...interface{}) error
+	Select(ctx context.Context, sqlString string, fa any, args ...any) error
 }
 
 func FetchSql(cursor string) string {
@@ -82,7 +82,7 @@ type Out struct {
 
 	// Dest is a pointer to the value that will be set to the result of the
 	// stored procedure's OUT parameter.
-	Dest interface{}
+	Dest any
 }
 
 type InOut struct {
@@ -96,7 +96,7 @@ type InOut struct {
 
 	// Dest is a pointer to the value that will be set to the result of the
 	// stored procedure's OUT parameter.
-	Dest interface{}
+	Dest any
 }
 
 type _DS struct {
@@ -249,26 +249,26 @@ func (ds *_DS) Session(ctx context.Context) *gorm.DB {
 	return tx.WithContext(ctx)
 }
 
-func (ds *_DS) Create(ctx context.Context, table string, dataObjRef interface{}) error {
+func (ds *_DS) Create(ctx context.Context, table string, dataObjRef any) error {
 	return ds.Session(ctx).Table(table).Create(dataObjRef).Error
 }
 
-func (ds *_DS) ReadAll(ctx context.Context, table string, sliceOfDataObjRef interface{}) error {
+func (ds *_DS) ReadAll(ctx context.Context, table string, sliceOfDataObjRef any) error {
 	return ds.Session(ctx).Table(table).Find(sliceOfDataObjRef).Error
 }
 
-func (ds *_DS) Read(ctx context.Context, table string, dataObjRef interface{}, pk ...interface{}) error {
+func (ds *_DS) Read(ctx context.Context, table string, dataObjRef any, pk ...any) error {
 	return ds.Session(ctx).Table(table).Take(dataObjRef, pk...).Error
 }
 
-func (ds *_DS) Update(ctx context.Context, table string, dataObjRef interface{}) (rowsAffected int64, err error) {
+func (ds *_DS) Update(ctx context.Context, table string, dataObjRef any) (rowsAffected int64, err error) {
 	db := ds.Session(ctx).Table(table).Updates(dataObjRef)
 	err = db.Error
 	rowsAffected = db.RowsAffected
 	return
 }
 
-func (ds *_DS) Delete(ctx context.Context, table string, dataObjRef interface{}) (rowsAffected int64, err error) {
+func (ds *_DS) Delete(ctx context.Context, table string, dataObjRef any) (rowsAffected int64, err error) {
 	db := ds.Session(ctx).Table(table).Delete(dataObjRef)
 	err = db.Error
 	rowsAffected = db.RowsAffected
@@ -277,35 +277,35 @@ func (ds *_DS) Delete(ctx context.Context, table string, dataObjRef interface{})
 
 // raw-SQL --------------------------------
 
-func (ds *_DS) rawBuild(ctx context.Context, sqlString string, args ...interface{}) *gorm.DB {
+func (ds *_DS) rawBuild(ctx context.Context, sqlString string, args ...any) *gorm.DB {
 	return ds.Session(ctx).Raw(sqlString, args...)
 }
 
-func (ds *_DS) rawQuery(ctx context.Context, sqlString string, args ...interface{}) (*sql.Rows, error) {
+func (ds *_DS) rawQuery(ctx context.Context, sqlString string, args ...any) (*sql.Rows, error) {
 	return ds.rawBuild(ctx, sqlString, args...).Rows()
 }
 
-func (ds *_DS) rawExec(ctx context.Context, sqlString string, args ...interface{}) (rowsAffected int64, err error) {
+func (ds *_DS) rawExec(ctx context.Context, sqlString string, args ...any) (rowsAffected int64, err error) {
 	res := ds.Session(ctx).Exec(sqlString, args...)
 	return res.RowsAffected, res.Error
 }
 
-func isPtr(p interface{}) bool {
+func isPtr(p any) bool {
 	val := reflect.ValueOf(p)
 	kindOfJ := val.Kind()
 	return kindOfJ == reflect.Ptr
 }
 
-func pointsToNil(p interface{}) bool {
+func pointsToNil(p any) bool {
 	switch d := p.(type) {
-	case *interface{}:
+	case *any:
 		pointsTo := *d
 		return pointsTo == nil
 	}
 	return false
 }
 
-func validateDest(dest interface{}) (err error) {
+func validateDest(dest any) (err error) {
 	if dest == nil {
 		err = errors.New("Out/InOut -> Dest is nil")
 	} else if !isPtr(dest) {
@@ -316,10 +316,10 @@ func validateDest(dest interface{}) (err error) {
 	return
 }
 
-func (ds *_DS) processExecParams(args []interface{}, onRowArr *[]interface{}, queryArgs *[]interface{}) (hasParamsImplRc bool, hasParamsOutRc bool, err error) {
+func (ds *_DS) processExecParams(args []any, onRowArr *[]any, queryArgs *[]any) (hasParamsImplRc bool, hasParamsOutRc bool, err error) {
 	for _, arg := range args {
 		switch param := arg.(type) {
-		case []func(map[string]interface{}):
+		case []func(map[string]any):
 			if hasParamsOutRc {
 				err = errUnexpectedType(args)
 				return
@@ -328,7 +328,7 @@ func (ds *_DS) processExecParams(args []interface{}, onRowArr *[]interface{}, qu
 			for _, fn := range param {
 				*onRowArr = append(*onRowArr, fn)
 			}
-		case func(map[string]interface{}):
+		case func(map[string]any):
 			if hasParamsImplRc {
 				err = errUnexpectedType(args)
 				return
@@ -337,23 +337,23 @@ func (ds *_DS) processExecParams(args []interface{}, onRowArr *[]interface{}, qu
 			*onRowArr = append(*onRowArr, param) // add single func
 			var rows driver.Rows
 			*queryArgs = append(*queryArgs, sql.Out{Dest: &rows, In: false})
-		case []interface{}:
+		case []any:
 			if hasParamsOutRc {
 				err = errUnexpectedType(args)
 				return
 			}
 			hasParamsImplRc = true
 			for _, fn := range param {
-				_, ok1 := fn.(func() (interface{}, func()))
-				_, ok2 := fn.(func(map[string]interface{}))
+				_, ok1 := fn.(func() (any, func()))
+				_, ok2 := fn.(func(map[string]any))
 				if !ok1 && !ok2 {
-					err = errors.New(fmt.Sprintf("Expected: 'func(map[string]interface{})' || "+
-						"'func() (interface{}, func())'. Got: %v", reflect.TypeOf(fn)))
+					err = errors.New(fmt.Sprintf("Expected: 'func(map[string]any)' || "+
+						"'func() (any, func())'. Got: %v", reflect.TypeOf(fn)))
 					return
 				}
 				*onRowArr = append(*onRowArr, fn)
 			}
-		case func() (interface{}, func()), func() ([]interface{}, func()):
+		case func() (any, func()), func() ([]any, func()):
 			if hasParamsImplRc {
 				err = errUnexpectedType(args)
 				return
@@ -406,7 +406,7 @@ func (ds *_DS) processExecParams(args []interface{}, onRowArr *[]interface{}, qu
 	return
 }
 
-func (ds *_DS) queryImplRcOracle(ctx context.Context, sqlString string, onRowArr []interface{}, queryArgs ...interface{}) error {
+func (ds *_DS) queryImplRcOracle(ctx context.Context, sqlString string, onRowArr []any, queryArgs ...any) error {
 	rows, err := ds.rawQuery(ctx, sqlString, queryArgs...)
 	if err != nil {
 		return err
@@ -420,7 +420,7 @@ func (ds *_DS) queryImplRcOracle(ctx context.Context, sqlString string, onRowArr
 			break
 		}
 		switch onRow := onRowArr[onRowIndex].(type) {
-		case func(map[string]interface{}):
+		case func(map[string]any):
 			// re-detect columns for each ResultSet
 			colNames, data, values, valuePointers, err := ds.prepareFetch(rows)
 			if err != nil {
@@ -436,7 +436,7 @@ func (ds *_DS) queryImplRcOracle(ctx context.Context, sqlString string, onRowArr
 				}
 				onRow(data)
 			}
-		case func() (interface{}, func()):
+		case func() (any, func()):
 			err = fetchRows(rows, onRow)
 			if err != nil {
 				return err
@@ -449,11 +449,11 @@ func (ds *_DS) queryImplRcOracle(ctx context.Context, sqlString string, onRowArr
 	return nil
 }
 
-func fetchRows(rows *sql.Rows, onRow func() (interface{}, func())) (err error) {
+func fetchRows(rows *sql.Rows, onRow func() (any, func())) (err error) {
 	for rows.Next() {
 		fa, onRowCompleted := onRow()
 		switch _fa := fa.(type) {
-		case []interface{}:
+		case []any:
 			err = rows.Scan(_fa...)
 		default:
 			err = errUnexpectedType(_fa)
@@ -466,7 +466,7 @@ func fetchRows(rows *sql.Rows, onRow func() (interface{}, func())) (err error) {
 	return
 }
 
-func (ds *_DS) queryImplRc(ctx context.Context, sqlString string, onRowArr []interface{}, queryArgs ...interface{}) error {
+func (ds *_DS) queryImplRc(ctx context.Context, sqlString string, onRowArr []any, queryArgs ...any) error {
 	rows, err := ds.rawQuery(ctx, sqlString, queryArgs...)
 	if err != nil {
 		return err
@@ -475,7 +475,7 @@ func (ds *_DS) queryImplRc(ctx context.Context, sqlString string, onRowArr []int
 	onRowIndex := 0
 	for {
 		switch onRow := onRowArr[onRowIndex].(type) {
-		case func(map[string]interface{}):
+		case func(map[string]any):
 			// re-detect columns for each ResultSet
 			colNames, data, values, valuePointers, err := ds.prepareFetch(rows)
 			if err != nil {
@@ -491,7 +491,7 @@ func (ds *_DS) queryImplRc(ctx context.Context, sqlString string, onRowArr []int
 				}
 				onRow(data)
 			}
-		case func() (interface{}, func()):
+		case func() (any, func()):
 			err = fetchRows(rows, onRow)
 			if err != nil {
 				return err
@@ -507,7 +507,7 @@ func (ds *_DS) queryImplRc(ctx context.Context, sqlString string, onRowArr []int
 	return nil
 }
 
-func (ds *_DS) exec2(ctx context.Context, sqlString string, onRowArr []interface{}, args ...interface{}) (rowsAffected int64, err error) {
+func (ds *_DS) exec2(ctx context.Context, sqlString string, onRowArr []any, args ...any) (rowsAffected int64, err error) {
 	rowsAffected, err = ds.rawExec(ctx, sqlString, args...)
 	if err != nil {
 		return
@@ -532,13 +532,13 @@ func (ds *_DS) exec2(ctx context.Context, sqlString string, onRowArr []interface
 	return
 }
 
-func fetchDriverRows(rows driver.Rows, onRowFunc interface{}) error {
+func fetchDriverRows(rows driver.Rows, onRowFunc any) error {
 	defer _close(rows)
 	colNames := rows.Columns()
 	values := make([]driver.Value, len(colNames))
 	switch onRow := onRowFunc.(type) {
-	case func(map[string]interface{}):
-		data := make(map[string]interface{})
+	case func(map[string]any):
+		data := make(map[string]any)
 		for {
 			err := rows.Next(values)
 			if err != nil {
@@ -549,7 +549,7 @@ func fetchDriverRows(rows driver.Rows, onRowFunc interface{}) error {
 			}
 			onRow(data)
 		}
-	case func() (interface{}, func()):
+	case func() (any, func()):
 		for {
 			err := rows.Next(values)
 			if err != nil {
@@ -560,7 +560,7 @@ func fetchDriverRows(rows driver.Rows, onRowFunc interface{}) error {
 			}
 			fa, onRowCompleted := onRow()
 			switch _fa := fa.(type) {
-			case []interface{}:
+			case []any:
 				for i, v := range values {
 					err = _setAny(_fa[i], v)
 					if err != nil {
@@ -578,7 +578,7 @@ func fetchDriverRows(rows driver.Rows, onRowFunc interface{}) error {
 	return nil
 }
 
-func assignPtrParams(values []interface{}, queryArgs []interface{}) error {
+func assignPtrParams(values []any, queryArgs []any) error {
 	for i, arg := range queryArgs {
 		if isPtr(arg) {
 			err := SetRes(arg, values[i])
@@ -590,10 +590,10 @@ func assignPtrParams(values []interface{}, queryArgs []interface{}) error {
 	return nil
 }
 
-func (ds *_DS) Exec(ctx context.Context, sqlString string, args ...interface{}) (rowsAffected int64, err error) {
+func (ds *_DS) Exec(ctx context.Context, sqlString string, args ...any) (rowsAffected int64, err error) {
 	sqlString = ds.formatSQL(sqlString)
-	var onRowArr []interface{}
-	var queryArgs []interface{}
+	var onRowArr []any
+	var queryArgs []any
 	// Syntax like [on_test1:Test, on_test2:Test] is used to call SP with IMPLICIT cursors
 	hasImplRcParams, _, err := ds.processExecParams(args, &onRowArr, &queryArgs)
 	if err != nil {
@@ -609,10 +609,10 @@ func (ds *_DS) Exec(ctx context.Context, sqlString string, args ...interface{}) 
 	return ds.exec2(ctx, sqlString, onRowArr, queryArgs...)
 }
 
-func (ds *_DS) Query(ctx context.Context, sqlString string, destPtr interface{}, args ...interface{}) error {
+func (ds *_DS) Query(ctx context.Context, sqlString string, destPtr any, args ...any) error {
 	sqlString = ds.formatSQL(sqlString)
-	var onRowArr []interface{}
-	var queryArgs []interface{}
+	var onRowArr []any
+	var queryArgs []any
 	implicitCursors, outCursors, err := ds.processExecParams(args, &onRowArr, &queryArgs)
 	if err != nil {
 		return err
@@ -651,7 +651,7 @@ func (ds *_DS) Query(ctx context.Context, sqlString string, destPtr interface{},
 	return nil
 }
 
-func (ds *_DS) QueryAll(ctx context.Context, sqlString string, destSlicePtr interface{}, args ...interface{}) (err error) {
+func (ds *_DS) QueryAll(ctx context.Context, sqlString string, destSlicePtr any, args ...any) (err error) {
 	sqlString = ds.formatSQL(sqlString)
 	rows, err := ds.rawQuery(ctx, sqlString, args...)
 	if err != nil {
@@ -662,7 +662,7 @@ func (ds *_DS) QueryAll(ctx context.Context, sqlString string, destSlicePtr inte
 	return
 }
 
-func (ds *_DS) selectAllScalars(rows *sql.Rows, dest interface{}) error {
+func (ds *_DS) selectAllScalars(rows *sql.Rows, dest any) error {
 	base, direct, elemIsPtr, err := prepareSelectScalars(dest)
 	if err != nil {
 		return err
@@ -702,7 +702,7 @@ func (ds *_DS) selectAllScalars(rows *sql.Rows, dest interface{}) error {
 	return err
 }
 
-func prepareSelectScalars(dest interface{}) (base reflect.Type, direct reflect.Value, elemIsPtr bool, err error) {
+func prepareSelectScalars(dest any) (base reflect.Type, direct reflect.Value, elemIsPtr bool, err error) {
 	value := reflect.ValueOf(dest)
 	if value.Kind() != reflect.Ptr {
 		err = errors.New("must pass a pointer, not a value")
@@ -740,7 +740,7 @@ func Deref(t reflect.Type) reflect.Type {
 	return t
 }
 
-func (ds *_DS) QueryRow(ctx context.Context, sqlString string, args ...interface{}) (row map[string]interface{}, err error) {
+func (ds *_DS) QueryRow(ctx context.Context, sqlString string, args ...any) (row map[string]any, err error) {
 	sqlString = ds.formatSQL(sqlString)
 	rows, err := ds.rawQuery(ctx, sqlString, args...)
 	if err != nil {
@@ -770,7 +770,7 @@ func (ds *_DS) QueryRow(ctx context.Context, sqlString string, args ...interface
 	return
 }
 
-func (ds *_DS) QueryAllRows(ctx context.Context, sqlString string, onRow func(map[string]interface{}), args ...interface{}) (err error) {
+func (ds *_DS) QueryAllRows(ctx context.Context, sqlString string, onRow func(map[string]any), args ...any) (err error) {
 	// many thanks to:
 	// https://stackoverflow.com/questions/51731423/how-to-read-a-row-from-a-table-to-a-map-without-knowing-columns
 	sqlString = ds.formatSQL(sqlString)
@@ -803,7 +803,7 @@ func (ds *_DS) QueryAllRows(ctx context.Context, sqlString string, onRow func(ma
 	return
 }
 
-func isPtrSlice(i interface{}) bool {
+func isPtrSlice(i any) bool {
 	// https://stackoverflow.com/questions/69675420/how-to-check-if-interface-is-a-a-pointer-to-a-slice
 	if i == nil {
 		return false
@@ -815,9 +815,9 @@ func isPtrSlice(i interface{}) bool {
 	return v.Elem().Kind() == reflect.Slice
 }
 
-func (ds *_DS) Select(ctx context.Context, sqlString string, dest interface{}, args ...interface{}) error {
+func (ds *_DS) Select(ctx context.Context, sqlString string, dest any, args ...any) error {
 	sqlString = ds.formatSQL(sqlString)
-	faArr, ok := dest.([]interface{})
+	faArr, ok := dest.([]any)
 	if ok {
 		rows, err := ds.rawQuery(ctx, sqlString, args...)
 		if err != nil {
@@ -836,7 +836,7 @@ func (ds *_DS) Select(ctx context.Context, sqlString string, dest interface{}, a
 		}
 		return nil
 	}
-	onRow, ok := dest.(func() (interface{}, func()))
+	onRow, ok := dest.(func() (any, func()))
 	if ok {
 		rows, err := ds.rawQuery(ctx, sqlString, args...)
 		if err != nil {
@@ -856,11 +856,11 @@ func (ds *_DS) Select(ctx context.Context, sqlString string, dest interface{}, a
 	return raw.Take(dest).Error
 }
 
-func fetchAll(rows *sql.Rows, onRow func() (interface{}, func())) (err error) {
+func fetchAll(rows *sql.Rows, onRow func() (any, func())) (err error) {
 	for {
 		for rows.Next() {
 			fa, onRowComplete := onRow()
-			faArr, ok := fa.([]interface{})
+			faArr, ok := fa.([]any)
 			if ok {
 				err = rows.Scan(faArr...)
 			} else {
@@ -877,17 +877,17 @@ func fetchAll(rows *sql.Rows, onRow func() (interface{}, func())) (err error) {
 	}
 }
 
-func (ds *_DS) prepareFetch(rows *sql.Rows) (colNames []string, data map[string]interface{}, values []interface{}, valuePointers []interface{}, err error) {
+func (ds *_DS) prepareFetch(rows *sql.Rows) (colNames []string, data map[string]any, values []any, valuePointers []any, err error) {
 	colNames, err = rows.Columns()
 	if err != nil {
 		return
 	}
-	data = make(map[string]interface{})
-	// interface{} is ok for SQLite3, Oracle, and SQL Server.
+	data = make(map[string]any)
+	// any is ok for SQLite3, Oracle, and SQL Server.
 	// MySQL and PostgreSQL may require some convertors from []uint8
 	// https://github.com/ziutek/mymysql#type-mapping
-	values = make([]interface{}, len(colNames))
-	valuePointers = make([]interface{}, len(colNames))
+	values = make([]any, len(colNames))
+	valuePointers = make([]any, len(colNames))
 	for i := range values {
 		valuePointers[i] = &values[i]
 	}
@@ -917,13 +917,13 @@ func (ds *_DS) formatSQL(sqlString string) string {
 
 /////////////////////////////////////////////////////////////
 
-func SetString(d *string, row map[string]interface{}, col string, errMap map[string]int) {
-	_copy(row, col, errMap, func(value interface{}) error {
+func SetString(d *string, row map[string]any, col string, errMap map[string]int) {
+	_copy(row, col, errMap, func(value any) error {
 		return _setString(d, value)
 	})
 }
 
-func _setString(d *string, value interface{}) error {
+func _setString(d *string, value any) error {
 	if value == nil {
 		*d = ""
 		return nil
@@ -945,13 +945,13 @@ func _setString(d *string, value interface{}) error {
 	return nil
 }
 
-func SetInt64(d *int64, row map[string]interface{}, col string, errMap map[string]int) {
-	_copy(row, col, errMap, func(value interface{}) error {
+func SetInt64(d *int64, row map[string]any, col string, errMap map[string]int) {
+	_copy(row, col, errMap, func(value any) error {
 		return _setInt64(d, value)
 	})
 }
 
-func _setInt64(d *int64, value interface{}) error {
+func _setInt64(d *int64, value any) error {
 	switch v := value.(type) {
 	case int64:
 		*d = v
@@ -981,13 +981,13 @@ func _setInt64(d *int64, value interface{}) error {
 	return nil
 }
 
-func SetInt(d *int, row map[string]interface{}, col string, errMap map[string]int) {
-	_copy(row, col, errMap, func(value interface{}) error {
+func SetInt(d *int, row map[string]any, col string, errMap map[string]int) {
+	_copy(row, col, errMap, func(value any) error {
 		return _setInt(d, value)
 	})
 }
 
-func _setInt(d *int, value interface{}) error {
+func _setInt(d *int, value any) error {
 	switch v := value.(type) {
 	case int:
 		*d = v
@@ -1018,13 +1018,13 @@ func _setInt(d *int, value interface{}) error {
 	return nil
 }
 
-func SetInt32(d *int32, row map[string]interface{}, col string, errMap map[string]int) {
-	_copy(row, col, errMap, func(value interface{}) error {
+func SetInt32(d *int32, row map[string]any, col string, errMap map[string]int) {
+	_copy(row, col, errMap, func(value any) error {
 		return _setInt32(d, value)
 	})
 }
 
-func _setInt32(d *int32, value interface{}) error {
+func _setInt32(d *int32, value any) error {
 	switch v := value.(type) {
 	case int32:
 		*d = v
@@ -1053,13 +1053,13 @@ func _setInt32(d *int32, value interface{}) error {
 	return nil
 }
 
-func SetFloat32(d *float32, row map[string]interface{}, col string, errMap map[string]int) {
-	_copy(row, col, errMap, func(value interface{}) error {
+func SetFloat32(d *float32, row map[string]any, col string, errMap map[string]int) {
+	_copy(row, col, errMap, func(value any) error {
 		return _setFloat32(d, value)
 	})
 }
 
-func _setFloat32(d *float32, value interface{}) error {
+func _setFloat32(d *float32, value any) error {
 	switch v := value.(type) {
 	case float32:
 		*d = v
@@ -1084,13 +1084,13 @@ func _setFloat32(d *float32, value interface{}) error {
 	return nil
 }
 
-func SetFloat64(d *float64, row map[string]interface{}, col string, errMap map[string]int) {
-	_copy(row, col, errMap, func(value interface{}) error {
+func SetFloat64(d *float64, row map[string]any, col string, errMap map[string]int) {
+	_copy(row, col, errMap, func(value any) error {
 		return _setFloat64(d, value)
 	})
 }
 
-func _setFloat64(d *float64, value interface{}) error {
+func _setFloat64(d *float64, value any) error {
 	switch v := value.(type) {
 	case float64:
 		*d = v
@@ -1115,13 +1115,13 @@ func _setFloat64(d *float64, value interface{}) error {
 	return nil
 }
 
-func SetTime(d *time.Time, row map[string]interface{}, col string, errMap map[string]int) {
-	_copy(row, col, errMap, func(value interface{}) error {
+func SetTime(d *time.Time, row map[string]any, col string, errMap map[string]int) {
+	_copy(row, col, errMap, func(value any) error {
 		return _setTime(d, value)
 	})
 }
 
-func _setTime(d *time.Time, value interface{}) error {
+func _setTime(d *time.Time, value any) error {
 	switch v := value.(type) {
 	case time.Time:
 		*d = v
@@ -1131,13 +1131,13 @@ func _setTime(d *time.Time, value interface{}) error {
 	return nil
 }
 
-func SetBool(d *bool, row map[string]interface{}, col string, errMap map[string]int) {
-	_copy(row, col, errMap, func(value interface{}) error {
+func SetBool(d *bool, row map[string]any, col string, errMap map[string]int) {
+	_copy(row, col, errMap, func(value any) error {
 		return _setBool(d, value)
 	})
 }
 
-func _setBool(d *bool, value interface{}) error {
+func _setBool(d *bool, value any) error {
 	switch v := value.(type) {
 	case []byte:
 		str := string(v) // MySQL
@@ -1154,13 +1154,13 @@ func _setBool(d *bool, value interface{}) error {
 	return nil
 }
 
-func SetBytes(d *[]byte, row map[string]interface{}, col string, errMap map[string]int) {
-	_copy(row, col, errMap, func(value interface{}) error {
+func SetBytes(d *[]byte, row map[string]any, col string, errMap map[string]int) {
+	_copy(row, col, errMap, func(value any) error {
 		return _setBytes(d, value)
 	})
 }
 
-func _setBytes(d *[]byte, value interface{}) error {
+func _setBytes(d *[]byte, value any) error {
 	switch v := value.(type) {
 	case []byte:
 		*d = v
@@ -1170,8 +1170,8 @@ func _setBytes(d *[]byte, value interface{}) error {
 	return nil
 }
 
-func SetNum(d interface{}, row map[string]interface{}, col string, errMap map[string]int) {
-	_copy(row, col, errMap, func(value interface{}) error {
+func SetNum(d any, row map[string]any, col string, errMap map[string]int) {
+	_copy(row, col, errMap, func(value any) error {
 		s, ok := d.(sql.Scanner)
 		if ok {
 			return _scan(s, value)
@@ -1180,13 +1180,13 @@ func SetNum(d interface{}, row map[string]interface{}, col string, errMap map[st
 	})
 }
 
-func Scan(d sql.Scanner, row map[string]interface{}, col string, errMap map[string]int) {
-	_copy(row, col, errMap, func(value interface{}) error {
+func Scan(d sql.Scanner, row map[string]any, col string, errMap map[string]int) {
+	_copy(row, col, errMap, func(value any) error {
 		return _scan(d, value)
 	})
 }
 
-func _scan(d sql.Scanner, value interface{}) error {
+func _scan(d sql.Scanner, value any) error {
 	err := d.Scan(value)
 	if err != nil {
 		return assignErr(d, value, "_scan", err.Error())
@@ -1194,7 +1194,7 @@ func _scan(d sql.Scanner, value interface{}) error {
 	return nil
 }
 
-func _copy(row map[string]interface{}, col string, errMap map[string]int, fn func(value interface{}) error) {
+func _copy(row map[string]any, col string, errMap map[string]int, fn func(value any) error) {
 	var ok bool
 	value, ok := row[col]
 	if !ok {
@@ -1220,10 +1220,10 @@ func _copy(row map[string]interface{}, col string, errMap map[string]int, fn fun
 	}
 }
 
-func _setAny(dstPtr interface{}, value interface{}) error {
+func _setAny(dstPtr any, value any) error {
 	if value == nil {
 		switch d := dstPtr.(type) {
-		case *interface{}:
+		case *any:
 			*d = nil
 		}
 		return nil // leave as-is
@@ -1281,19 +1281,19 @@ func _setAny(dstPtr interface{}, value interface{}) error {
 	//  default:
 	//      return unknownTypeErr(d, value, "_setAny")
 	//	}
-	case *interface{}:
+	case *any:
 		*d = value
 		return nil
 	}
 	return errUnexpectedType(dstPtr)
 }
 
-func SetRes(dstPtr interface{}, value interface{}) error {
+func SetRes(dstPtr any, value any) error {
 	var err error
 	switch v := value.(type) {
-	case []interface{}:
+	case []any:
 		switch d := dstPtr.(type) {
-		case *[]interface{}:
+		case *[]any:
 			*d = v
 		default:
 			v0 := v[0]
@@ -1305,7 +1305,7 @@ func SetRes(dstPtr interface{}, value interface{}) error {
 	return err
 }
 
-func SetScalarValue(dstPtr interface{}, value interface{}, errMap map[string]int) {
+func SetScalarValue(dstPtr any, value any, errMap map[string]int) {
 	err := SetRes(dstPtr, value)
 	if err == nil {
 		return
@@ -1319,8 +1319,8 @@ func SetScalarValue(dstPtr interface{}, value interface{}, errMap map[string]int
 	}
 }
 
-func SetAny(dstPtr interface{}, row map[string]interface{}, col string, errMap map[string]int) {
-	_copy(row, col, errMap, func(value interface{}) error {
+func SetAny(dstPtr any, row map[string]any, col string, errMap map[string]int) {
+	_copy(row, col, errMap, func(value any) error {
 		SetScalarValue(dstPtr, value, errMap)
 		return nil
 	})
@@ -1335,15 +1335,15 @@ func ErrMapToErr(errMap map[string]int) (err error) {
 	return
 }
 
-func assignErr(dstPtr interface{}, value interface{}, funcName string, errMsg string) error {
+func assignErr(dstPtr any, value any, funcName string, errMsg string) error {
 	return errors.New(fmt.Sprintf("%s %T <- %T %s", funcName, dstPtr, value, errMsg))
 }
 
-func unknownTypeErr(dstPtr interface{}, value interface{}, funcName string) error {
+func unknownTypeErr(dstPtr any, value any, funcName string) error {
 	return assignErr(dstPtr, value, funcName, "unknown type")
 }
 
-func errUnexpectedType(val interface{}) error {
+func errUnexpectedType(val any) error {
 	return errors.New(fmt.Sprintf("unexpected type: %v", reflect.TypeOf(val)))
 }
 

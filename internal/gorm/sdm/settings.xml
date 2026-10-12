@@ -32,7 +32,7 @@
         <type detected="gorm-java.lang.String" target="string${json-gorm} -> SetString"/>
         <type detected="gorm-java.util.Date" target="time:time.Time${json-gorm} -> SetTime"/>
         <type detected="gorm-byte[]" target="[]byte${json-gorm} -> SetBytes"/>
-        <type detected="gorm-java.lang.Object" target="interface{}${json-gorm}"/>
+        <type detected="gorm-java.lang.Object" target="any${json-gorm}"/>
 
         <type detected="java.lang.Integer" target="int64${json} -> SetInt64"/>
         <type detected="java.lang.Float" target="float32${json} -> SetFloat32"/>
@@ -40,7 +40,7 @@
         <type detected="java.lang.String" target="string${json} -> SetString"/>
         <type detected="java.util.Date" target="time:time.Time${json} -> SetTime"/>
         <type detected="byte[]" target="[]byte${json} -> SetBytes"/>
-        <type detected="java.lang.Object" target="interface{}${json}"/>
+        <type detected="java.lang.Object" target="any${json}"/>
 
         <!-- mysql, postgres, sql server -->
 
@@ -68,7 +68,7 @@
         <!--        <type detected="gorm-java.time.LocalDateTime" target="${json-gorm-time}"/>-->
         <!--        <type detected="gorm-java.time.ZonedDateTime" target="${json-gorm-time}"/>-->
 
-        <!--        <type detected="gorm-java.lang.Object" target="interface{}${json-gorm}"/>-->
+        <!--        <type detected="gorm-java.lang.Object" target="any${json-gorm}"/>-->
 
         <!--        <type detected="java.util.UUID" target="github.com/google/uuid:uuid.UUID${json} -> SetUUID"/>-->
         <!--        <type detected="java.sql.Array" target="[]string${json}"/>-->
@@ -90,7 +90,7 @@
         <!--        <type detected="java.time.LocalDateTime" target="time:time.Time${json} -> SetTime"/>-->
         <!--        <type detected="java.time.ZonedDateTime" target="${json-gorm-time}"/>-->
 
-        <!--        <type detected="java.lang.Object" target="interface{}${json}"/>-->
+        <!--        <type detected="java.lang.Object" target="any${json}"/>-->
 
         <!--        <type detected="java.sql.ResultSet" target="string"/> &lt;!&ndash; PG cursor param &ndash;&gt;-->
 
@@ -138,7 +138,7 @@
         <!--        <type detected="gorm-byte[]" target="string${json-gorm}"/>-->
         <!--        <type detected="gorm-java.lang.Boolean" target="int64${json-gorm} -> SetBool"/>-->
 
-        <!--        <type detected="gorm-java.lang.Object" target="interface{}${json-gorm}"/>-->
+        <!--        <type detected="gorm-java.lang.Object" target="any${json-gorm}"/>-->
 
         <!--        <type detected="java.lang.Double" target="float64$${json} -> SetFloat64"/>-->
         <!--        <type detected="java.math.BigDecimal" target="github.com/godror/godror:godror.Number${json} -> SetNum"/>-->
@@ -152,7 +152,7 @@
         <!--        <type detected="byte[]" target="string${json}"/>-->
         <!--        <type detected="java.lang.Boolean" target="int64${json} -> SetBool"/>-->
 
-        <!--        <type detected="java.lang.Object" target="interface{}${json}"/>-->
+        <!--        <type detected="java.lang.Object" target="any${json}"/>-->
 
     </type-map>
 

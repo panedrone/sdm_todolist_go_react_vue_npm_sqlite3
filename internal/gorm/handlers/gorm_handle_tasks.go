@@ -98,8 +98,8 @@ func (h *taskHandlers) TasksReadByProject(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	// tasks, err := tDao.RawProjectTasks(ctx, uri.PId)
-	tasks, err := dbal.ReadProjectTasks(ctx, uri.PId)
+	tasks, err := dbal.RawProjectTasks(ctx, uri.PId)
+	//tasks, err := dbal.ReadProjectTasks(ctx, uri.PId)
 	if err != nil {
 		resp.Abort500(ctx, err)
 		return

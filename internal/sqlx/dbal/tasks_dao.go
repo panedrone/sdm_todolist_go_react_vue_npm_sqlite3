@@ -63,7 +63,9 @@ var DeleteTask = func(ctx context.Context, item *dto.Task) (rowsAffected int64, 
 
 var GetGroupTasks = func(ctx context.Context, gID int64) (res []*dto.TaskLi, err error) {
 	ds := DS(ctx)
-	sql := `select t_id, t_priority, t_date, t_subject from tasks where p_id =? 
+	sql := `select t_id, 
+		       -- p_id,  --- sqlx fails if no field in model 
+		       t_priority, t_date, t_subject from tasks where p_id =? 
 		order by t_id`
 	err = ds.Select(ctx, sql, &res, gID)
 	return

@@ -43,12 +43,12 @@ func AbortWithError(ctx *gin.Context, err *ErrorResponse) {
 	AbortWithJSON(ctx, http.StatusBadRequest, err)
 }
 
-func AbortWithJSON(ctx *gin.Context, httpStatusCode int, jsonObject interface{}) {
+func AbortWithJSON(ctx *gin.Context, httpStatusCode int, jsonObject any) {
 	ctx.Header("Content-Type", "application/json")
 	ctx.AbortWithStatusJSON(httpStatusCode, jsonObject)
 }
 
-func JSON(ctx *gin.Context, httpStatusCode int, jsonObject interface{}) {
+func JSON(ctx *gin.Context, httpStatusCode int, jsonObject any) {
 	ctx.Header("Content-Type", "application/json")
 	ctx.JSON(httpStatusCode, jsonObject)
 }
