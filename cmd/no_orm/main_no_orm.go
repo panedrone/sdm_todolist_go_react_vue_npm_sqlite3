@@ -1,7 +1,7 @@
 package main
 
 import (
-	"sdm_demo_todolist/internal/dbal"
+	"sdm_demo_todolist/internal/no_orm/dbal"
 	handlers2 "sdm_demo_todolist/internal/no_orm/handlers"
 	"sdm_demo_todolist/pkg"
 

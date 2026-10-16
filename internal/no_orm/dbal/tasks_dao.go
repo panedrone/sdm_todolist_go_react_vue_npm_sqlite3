@@ -5,7 +5,7 @@ package dbal
 
 import (
 	"context"
-	"sdm_demo_todolist/internal/dbal/models"
+	"sdm_demo_todolist/internal/no_orm/dbal/models"
 )
 
 // (C)RUD: tasks
@@ -27,7 +27,7 @@ var ReadTaskList = func(ctx context.Context) (res []*models.Task, err error) {
 	ds := DS(ctx)
 	sql := `select * from tasks`
 	errMap := make(map[string]int)
-	_onRow := func(row map[string]interface{}) {
+	_onRow := func(row map[string]any) {
 		item := models.Task{}
 		SetInt64(&item.TID, row, "t_id", errMap)
 		SetInt64(&item.PID, row, "p_id", errMap)
@@ -85,10 +85,10 @@ var DeleteTask = func(ctx context.Context, item *models.Task) (rowsAffected int6
 
 var ReadByProject = func(ctx context.Context, pID int64) (res []*models.TaskLi, err error) {
 	ds := DS(ctx)
-	sql := `select t_id, p_id, t_priority, t_date, t_subject from tasks where p_id =? 
+	sql := `select t_id, t_priority, t_date, t_subject from tasks where p_id =? 
 		order by t_id`
 	errMap := make(map[string]int)
-	_onRow := func(row map[string]interface{}) {
+	_onRow := func(row map[string]any) {
 		item := models.TaskLi{}
 		SetInt64(&item.TID, row, "t_id", errMap)
 		SetInt64(&item.TPriority, row, "t_priority", errMap)
@@ -121,7 +121,7 @@ var GetProjectTasks2 = func(ctx context.Context, gID string) (res []*models.Task
 	ds := DS(ctx)
 	sql := `delete from tasks where p_id=?`
 	errMap := make(map[string]int)
-	_onRow := func(row map[string]interface{}) {
+	_onRow := func(row map[string]any) {
 		item := models.TaskLi{}
 		SetInt64(&item.TID, row, "t_id", errMap)
 		SetInt64(&item.TPriority, row, "t_priority", errMap)

@@ -5,7 +5,7 @@ package dbal
 
 import (
 	"context"
-	"sdm_demo_todolist/internal/dbal/models"
+	"sdm_demo_todolist/internal/no_orm/dbal/models"
 )
 
 // (C)RUD: projects
@@ -63,7 +63,7 @@ var ReadAll = func(ctx context.Context) (res []*models.ProjectLi, err error) {
 		from projects p 
 		order by p.p_id`
 	errMap := make(map[string]int)
-	_onRow := func(row map[string]interface{}) {
+	_onRow := func(row map[string]any) {
 		item := models.ProjectLi{}
 		SetInt64(&item.PID, row, "p_id", errMap)
 		SetString(&item.PName, row, "p_name", errMap)
@@ -97,7 +97,7 @@ var GetProjectID = func(ctx context.Context) (res []int64, err error) {
 	return
 }
 
-var PID = func(ctx context.Context) (res int64, err error) {
+var PIdFirst = func(ctx context.Context) (res int64, err error) {
 	ds := DS(ctx)
 	sql := `select * from projects`
 	err = ds.Query(ctx, sql, &res)

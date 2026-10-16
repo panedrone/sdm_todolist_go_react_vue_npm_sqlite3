@@ -19,7 +19,7 @@
 
     <query-list method="GetProjectId" return-type="int64" ref="get_projects.sql"/> <!-- PASS -->
 
-    <query method="PId" return-type="int64" ref="select * from projects"/> <!-- PASS -->
+    <query method="PId_first" return-type="int64" ref="select * from projects"/> <!-- PASS -->
 
     <query method="ProjectId(p_id)" return-type="int64" ref="select * from projects where p_id=?"/> <!-- PASS -->
 

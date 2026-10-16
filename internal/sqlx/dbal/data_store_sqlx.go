@@ -9,7 +9,6 @@ import (
 	"io"
 	"reflect"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -53,118 +52,17 @@ type DataStore interface {
 	Select(ctx context.Context, sqlString string, dest any, args ...any) error
 }
 
-func FetchPg(cursor string) string {
-	return fmt.Sprintf(`fetch all from "%s"`, cursor)
-}
-
-type Out struct {
-	/*
-		var outParam float64 // no need to init
-		cxDao.SpTestOutParams(47, Out{Dest: &outParam})
-		// cxDao.SpTestOutParams(47, &outParam) // <- this one is also ok for OUT parameters
-		fmt.Println(outParam)
-
-		// not working in MySQL, see https://sqldalmaker.sourceforge.net/sp-udf.html#mysql_out_params
-	*/
-
-	// Dest is a pointer to the value that will be set to the result of the
-	// stored procedure's OUT parameter.
-	Dest any
-}
-
-type InOut struct {
-	/*
-		inOutParam := 123.0 // must be initialized for INOUT
-		cxDao.SpTestInoutParams(InOut{Dest: &inOutParam})
-		fmt.Println(inOutParam)
-
-		// not working in MySQL, see https://sqldalmaker.sourceforge.net/sp-udf.html#mysql_out_params
-	*/
-
-	// Dest is a pointer to the value that will be set to the result of the
-	// stored procedure's OUT parameter.
-	Dest any
-}
-
 type _DS struct {
-	paramPrefix string
-	db          *sqlx.DB
+	db *sqlx.DB
 }
 
 func (ds *_DS) Db() *sqlx.DB {
 	return ds.db
 }
 
-/*
-
-// 	Implement "func (ds *_DS) initDb()" in an external file:
-
-package dbal
-
-import (
-	"github.com/jmoiron/sqlx"
-   	// _ "github.com/mattn/go-sqlite3"      // SQLite3
-   	// _ "github.com/denisenkom/go-mssqldb" // SQL Server
-   	// _ "github.com/godror/godror"			// Oracle
-   	_ "github.com/go-sql-driver/mysql"      // MySQL
-   	// _ "github.com/ziutek/mymysql/godrv"  // MySQL
-   	// _ "github.com/lib/pq"                // PostgeSQL
-)
-
-var ds = &_DS{}
-
-func (ds *_DS) initDb() (err error) {
-	// === PostgeSQL ===========================
-	ds.paramPrefix = "$"
-	ds.db, err = sqlx.Open("postgres", "postgres://postgres:sa@localhost/my-test_tasks?sslmode=disable")
-	// ds.db, err = sqlx.Open("postgres", "postgres://postgres:sa@localhost/my-test_tasks?sslmode=verify-full")
-	// === SQLite3 =============================
-	// ds.db, err = sqlx.Open("sqlite3", "./log.sqlite")
-	// ds.db, err = sqlx.Open("sqlite3", "./northwindEF.sqlite")
-	// === MySQL ===============================
-	// ds.db, err = sqlx.Open("mysql", "root:root@/sakila")
-	// ds.db, err = sqlx.Open("mymysql", "sakila/root/root")
-	// === SQL Server ==========================
-	// https://github.com/denisenkom/go-mssqldb
-	// The sqlserver driver uses normal MS SQL Server syntax and expects parameters in the
-	// sql query to be in the form of either @Name or @p1 to @pN (ordinal position).
-	// ensure sqlserver:// in beginning. this one is not valid:
-	// ------ ds.db, err = sqlx.Open("sqlserver", "sa:root@/localhost:1433/SQLExpress?database=AdventureWorks2014")
-	// this one is ok:
-	ds.paramPrefix = "@p"
-	ds.db, err = sqlx.Open("sqlserver", "sqlserver://sa:root@localhost:1433?database=AdventureWorks2014")
-	// === Oracle =============================
-	// "github.com/godror/godror"
-	//ds.paramPrefix = ":"
-	//ds.db, err = sqlx.Open("godror", `user="ORDERS" password="root" connectString="localhost:1521/orcl"`)
-	return
-}
-
-var _ds = &_DS{}
-
-func Ds() DataStore {
-	return _ds
-}
-
-func NewTestDao() *TestDao {
-	return &TestDao{ds: _ds}
-}
-
-*/
-
+// Open — initDb is in data_store_sqlx_ex.go
 func (ds *_DS) Open() error {
-	err := ds.initDb()
-	if err != nil {
-		return err
-	}
-	name := reflect.TypeOf(ds.db.Driver()).String()
-	name = strings.ToLower(name)
-	if strings.Contains(name, "pq") {
-		ds.paramPrefix = "$"
-	} else if strings.Contains(name, "or") {
-		ds.paramPrefix = ":"
-	}
-	return err
+	return ds.initDb()
 }
 
 func (ds *_DS) Close() error {
@@ -173,18 +71,6 @@ func (ds *_DS) Close() error {
 
 func _close(obj io.Closer) {
 	_ = obj.Close()
-}
-
-func (ds *_DS) isPgSql() bool {
-	return ds.paramPrefix == "$"
-}
-
-func (ds *_DS) isOracle() bool {
-	return ds.paramPrefix == ":"
-}
-
-func (ds *_DS) isMsSql() bool {
-	return ds.paramPrefix == "@p"
 }
 
 const txKey = "tx"
@@ -254,61 +140,8 @@ func (ds *_DS) execSqlx(ctx context.Context, sqlString string, args ...any) (sql
 	return tx.ExecContext(ctx, sqlString, args...)
 }
 
-func (ds *_DS) insertPgSql(ctx context.Context, sqlString string, aiNames string, args ...any) (id any, err error) {
-	// fetching of multiple AI values is not implemented so far:
-	sqlString += " RETURNING " + aiNames
-	rows, err := ds.querySqlx(ctx, sqlString, args...)
-	if err != nil {
-		return nil, err
-	}
-	defer _close(rows)
-	if rows.Next() {
-		var data any
-		err = rows.Scan(&data)
-		return
-	}
-	err = errors.New("rows.Next() FAILED:" + sqlString)
-	return
-}
-
-func (ds *_DS) insertOracle(ctx context.Context, sqlString string, aiNames string, args ...any) (id any, err error) {
-	// fetching of multiple AI values is not implemented so far:
-	sqlString = fmt.Sprintf("%s returning %s  into :%d", sqlString, aiNames, len(args)+1)
-	// https://ddcode.net/2019/05/11/how-does-go-call-oracles-stored-procedures-and-get-the-return-value-of-the-stored-procedures/
-	var id64 float64
-	// var id64 any --- error
-	// var id64 int64 --- it works, but...
-	args = append(args, sql.Out{Dest: &id64, In: false})
-	// ----------------
-	_, err = ds.execSqlx(ctx, sqlString, args...)
-	if err != nil {
-		return
-	}
-	return id64, nil
-}
-
-func (ds *_DS) insertMsSql(ctx context.Context, sqlString string, args ...any) (id any, err error) {
-	// SQL Server https://github.com/denisenkom/go-mssqldb
-	// LastInsertId should not be used with this driver (or SQL Server) due to
-	// how the TDS protocol works. Please use the OUTPUT Clause or add a select
-	// ID = convert(bigint, SCOPE_IDENTITY()); to the end of your query (ref SCOPE_IDENTITY).
-	//  This will ensure you are getting the correct ID and will prevent a network round trip.
-	sqlString += ";SELECT @@IDENTITY;"
-	rows, err := ds.querySqlx(ctx, sqlString, args...)
-	if err != nil {
-		return
-	}
-	defer _close(rows)
-	if rows.Next() {
-		var data any
-		err = rows.Scan(&data) // returns []uint8
-		return data, err
-	}
-	err = errors.New("SELECT @@IDENTITY FAILED: " + sqlString)
-	return
-}
-
-func (ds *_DS) insertDefault(ctx context.Context, sqlString string, args ...any) (id any, err error) {
+// insert — SQLite: LastInsertId
+func (ds *_DS) insert(ctx context.Context, sqlString string, _ string, args ...any) (id any, err error) {
 	res, err := ds.execSqlx(ctx, sqlString, args...)
 	if err != nil {
 		return
@@ -322,214 +155,19 @@ func (ds *_DS) Insert(ctx context.Context, sqlString string, aiNames string, arg
 		err = errors.New("_DS.insert is not applicable for aiNames = " + aiNames)
 		return
 	}
-	// Builtin LastInsertId works only with MySQL and SQLite3
-	sqlString = ds.formatSQL(sqlString)
-	if ds.isPgSql() {
-		return ds.insertPgSql(ctx, sqlString, aiNames, args...)
-	} else if ds.isMsSql() {
-		return ds.insertMsSql(ctx, sqlString, args...)
-	} else if ds.isOracle() {
-		// Oracle: specify AI values explicitly:
-		// <crud-auto model="ProjectInfo" table="PROJECTS" generated="P_ID"/>
-		return ds.insertOracle(ctx, sqlString, aiNames, args...)
-	}
-	return ds.insertDefault(ctx, sqlString, args...)
+	return ds.insert(ctx, ds.formatSQL(sqlString), aiNames, args...)
 }
 
-func isPtr(p any) bool {
-	val := reflect.ValueOf(p)
-	kindOfJ := val.Kind()
-	return kindOfJ == reflect.Ptr
-}
-
-func pointsToNil(p any) bool {
-	switch d := p.(type) {
-	case *any:
-		pointsTo := *d
-		return pointsTo == nil
-	}
-	return false
-}
-
-func validateDest(dest any) (err error) {
-	if dest == nil {
-		err = errors.New("Out/InOut -> Dest is nil")
-	} else if !isPtr(dest) {
-		err = errors.New("Out/InOut -> Dest must be a Ptr")
-	} else if pointsToNil(dest) {
-		err = errors.New("Out/InOut -> Dest points to nil")
-	}
-	return
-}
-
-func (ds *_DS) processExecParams(args []any, onRowArr *[]any, queryArgs *[]any) (hasParamsImplRc bool, hasParamsOutRc bool, err error) {
-	for _, arg := range args {
-		switch param := arg.(type) {
-		case []func(map[string]any):
-			if hasParamsOutRc {
-				err = errUnexpectedType(args)
-				return
-			}
-			hasParamsImplRc = true
-			for _, fn := range param {
-				*onRowArr = append(*onRowArr, fn)
-			}
-		case func(map[string]any):
-			if hasParamsImplRc {
-				err = errUnexpectedType(args)
-				return
-			}
-			hasParamsOutRc = true
-			*onRowArr = append(*onRowArr, param) // add single func
-			var rows driver.Rows
-			*queryArgs = append(*queryArgs, sql.Out{Dest: &rows, In: false})
-		case []any:
-			if hasParamsOutRc {
-				err = errUnexpectedType(args)
-				return
-			}
-			hasParamsImplRc = true
-			for _, fn := range param {
-				_, ok1 := fn.(func() (any, func()))
-				_, ok2 := fn.(func(map[string]any))
-				if !ok1 && !ok2 {
-					err = errors.New(fmt.Sprintf("Expected: 'func(map[string]any)' || "+
-						"'func() (any, func())'. Got: %v", reflect.TypeOf(fn)))
-					return
-				}
-				*onRowArr = append(*onRowArr, fn)
-			}
-		case func() (any, func()), func() ([]any, func()):
-			if hasParamsImplRc {
-				err = errUnexpectedType(args)
-				return
-			}
-			hasParamsOutRc = true
-			*onRowArr = append(*onRowArr, param) // add single func
-			var rows driver.Rows
-			*queryArgs = append(*queryArgs, sql.Out{Dest: &rows, In: false})
-		case *Out:
-			err = validateDest(param.Dest)
-			if err != nil {
-				return
-			}
-			*queryArgs = append(*queryArgs, sql.Out{Dest: param.Dest, In: false})
-		case Out:
-			err = validateDest(param.Dest)
-			if err != nil {
-				return
-			}
-			*queryArgs = append(*queryArgs, sql.Out{Dest: param.Dest, In: false})
-		case *InOut:
-			err = validateDest(param.Dest)
-			if err != nil {
-				return
-			}
-			*queryArgs = append(*queryArgs, sql.Out{Dest: param.Dest, In: true})
-		case InOut:
-			err = validateDest(param.Dest)
-			if err != nil {
-				return
-			}
-			*queryArgs = append(*queryArgs, sql.Out{Dest: param.Dest, In: true})
-		default:
-			if isPtr(arg) {
-				if pointsToNil(arg) {
-					err = errors.New("arg points to nil")
-					return
-				}
-				if ds.isOracle() {
-					*queryArgs = append(*queryArgs, sql.Out{Dest: arg, In: false})
-				} else {
-					*queryArgs = append(*queryArgs, arg) // PostgreSQL
-				}
-			} else {
-				*queryArgs = append(*queryArgs, arg)
-			}
-		}
-	}
-	// Syntax like [on_test1:Test, on_test2:Test] is used to call SP with IMPLICIT cursors
-	return
-}
-
-func (ds *_DS) queryImplRcOracle(ctx context.Context, sqlString string, onRowArr []any, queryArgs ...any) error {
-	rows, err := ds.querySqlx(ctx, sqlString, queryArgs...)
-	if err != nil {
-		return err
-	}
-	defer _close(rows)
-	onRowIndex := 0
-	for {
-		// 1) unlike MySQL, NextResultSet must be done before prepareFetch -> rows.Next()
-		// 2) it does not work with multiple Implicit RC + early versions of Driver
-		if !rows.NextResultSet() {
-			break
-		}
-		switch onRow := onRowArr[onRowIndex].(type) {
-		case func(map[string]any):
-			// re-detect columns for each ResultSet
-			row := make(map[string]any)
-			for rows.Next() {
-				err = rows.MapScan(row)
-				if err != nil {
-					return err
-				}
-				onRow(row)
-			}
-		case func() (any, func()):
-			err = ds.fetchSqlxRows(rows, onRow)
-			if err != nil {
-				return err
-			}
-		default:
-			return errUnexpectedType(onRow)
-		}
-		onRowIndex++
-	}
-	return nil
-}
-func (ds *_DS) queryImplRc(ctx context.Context, sqlString string, onRowArr []any, queryArgs ...any) error {
-	rows, err := ds.querySqlx(ctx, sqlString, queryArgs...)
-	if err != nil {
-		return err
-	}
-	defer _close(rows)
-	for _, fn := range onRowArr {
-		switch onRow := fn.(type) {
-		case func(map[string]any):
-			// re-detect columns for each ResultSet
-			row := make(map[string]any)
-			for rows.Next() {
-				err = rows.MapScan(row)
-				if err != nil {
-					return err
-				}
-				onRow(row)
-			}
-		case func() (any, func()):
-			err = ds.fetchSqlxRows(rows, onRow)
-			if err != nil {
-				return err
-			}
-		default:
-			return errUnexpectedType(onRow)
-		}
-		if !rows.NextResultSet() {
-			break
-		}
-	}
-	return nil
-}
-
-func (ds *_DS) fetchSqlxRows(rows *sqlx.Rows, onRow func() (any, func())) error {
+func (ds *_DS) fetchSqlxRows(rows *sqlx.Rows, onRow func(func(any) error) error) error {
 	sc := scanner{m: ds.db.Mapper}
+	scan := func(fa any) error {
+		return sc.Scan(rows, fa)
+	}
 	for rows.Next() {
-		fa, onRowCompleted := onRow()
-		err := sc.Scan(rows, fa)
+		err := onRow(scan)
 		if err != nil {
 			return err
 		}
-		onRowCompleted()
 	}
 	return nil
 }
@@ -561,143 +199,12 @@ func (s *scanner) Scan(rowsX *sqlx.Rows, fa any) error {
 	return rowsX.Scan(values...)
 }
 
-func (ds *_DS) exec2(ctx context.Context, sqlString string, onRowArr []any, args ...any) (rowsAffected int64, err error) {
-	var res sql.Result
-	res, err = ds.execSqlx(ctx, sqlString, args...)
+func (ds *_DS) execRows(ctx context.Context, sqlString string, args ...any) (rowsAffected int64, err error) {
+	res, err := ds.execSqlx(ctx, sqlString, args...)
 	if err != nil {
 		return
 	}
-	onRowIndex := 0
-	for _, arg := range args {
-		switch param := arg.(type) {
-		case sql.Out:
-			if param.Dest != nil {
-				switch rows := param.Dest.(type) {
-				case *driver.Rows:
-					onRow := onRowArr[onRowIndex]
-					err = ds.fetchDriverRows(*rows, onRow)
-					if err != nil {
-						return
-					}
-					onRowIndex++
-				}
-			}
-		}
-	}
-	rowsAffected, _ = res.RowsAffected()
-	return
-}
-
-func (ds *_DS) fetchDriverRows(dr driver.Rows, onRowFunc any) error {
-	defer _close(dr)
-	rx := newRows(dr)
-	switch onRow := onRowFunc.(type) {
-	case func(map[string]any):
-		data := make(map[string]any)
-		for {
-			if !rx.Next() {
-				break // not an error
-			}
-			rx.toMap(data)
-			onRow(data)
-		}
-	case func() (any, func()):
-		for rx.Next() {
-			fa, onRowCompleted := onRow()
-			var err error
-			switch _fa := fa.(type) {
-			case []any:
-				err = rx.toSlice(_fa)
-			default:
-				err = rx.toStruct(ds.db.Mapper, fa)
-			}
-			if err != nil {
-				return err
-			}
-			onRowCompleted()
-		}
-	default:
-		return errUnexpectedType(onRow)
-	}
-	return nil
-}
-
-type _Rows struct {
-	rows     driver.Rows
-	colNames []string
-	values   []driver.Value
-
-	fields [][]int
-}
-
-func newRows(rows driver.Rows) *_Rows {
-	colNames := rows.Columns()
-	return &_Rows{
-		rows:     rows,
-		colNames: rows.Columns(),
-		values:   make([]driver.Value, len(colNames)),
-	}
-}
-
-func (rx *_Rows) Close() error {
-	// implement sqlx.rowsi
-	return rx.rows.Close()
-}
-
-func (rx *_Rows) Columns() ([]string, error) {
-	// implement sqlx.rowsi
-	return rx.colNames, nil
-}
-
-func (rx *_Rows) Err() error {
-	// implement sqlx.rowsi
-	return nil
-}
-
-func (rx *_Rows) Next() bool {
-	// implement sqlx.rowsi
-	err := rx.rows.Next(rx.values)
-	return err == nil
-}
-
-func (rx *_Rows) Scan(_fa ...any) error {
-	// implement sqlx.rowsi --> to use in
-	for i, v := range rx.values {
-		err := _setAny(_fa[i], v)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (rx *_Rows) toMap(data map[string]any) {
-	for i, col := range rx.colNames {
-		data[col] = rx.values[i]
-	}
-}
-
-func (rx *_Rows) toSlice(_fa []any) error {
-	for i, v := range rx.values {
-		err := _setAny(_fa[i], v)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (rx *_Rows) toStruct(m *reflectx.Mapper, fa any) error {
-	if rx.fields == nil {
-		elemType := reflect.TypeOf(fa)
-		base := reflectx.Deref(elemType)
-		rx.fields = m.TraversalsByName(base, rx.colNames)
-	}
-	values, err := toValues(rx.fields, fa)
-	if err != nil {
-		return err
-	}
-	return rx.Scan(values...)
+	return res.RowsAffected()
 }
 
 func toValues(fields [][]int, fa any) ([]any, error) {
@@ -731,49 +238,14 @@ func fieldsByTraversal(v reflect.Value, traversals [][]int, values []any, ptrs b
 	return nil
 }
 
-func assignPtrParams(values []any, queryArgs []any) error {
-	for i, arg := range queryArgs {
-		if isPtr(arg) {
-			err := SetRes(arg, values[i])
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
 func (ds *_DS) Exec(ctx context.Context, sqlString string, args ...any) (rowsAffected int64, err error) {
 	sqlString = ds.formatSQL(sqlString)
-	var onRowArr []any
-	var queryArgs []any
-	// Syntax like [on_test1:Test, on_test2:Test] is used to call SP with IMPLICIT cursors
-	hasImplRcParams, _, err := ds.processExecParams(args, &onRowArr, &queryArgs)
-	if err != nil {
-		return
-	}
-	if hasImplRcParams {
-		if ds.isOracle() {
-			return 0, ds.queryImplRcOracle(ctx, sqlString, onRowArr, queryArgs...)
-		}
-		// it works with MySQL SP and PgSql
-		return 0, ds.queryImplRc(ctx, sqlString, onRowArr, queryArgs...)
-	}
-	return ds.exec2(ctx, sqlString, onRowArr, queryArgs...)
+	return ds.execRows(ctx, sqlString, args...)
 }
 
 func (ds *_DS) Query(ctx context.Context, sqlString string, destPtr any, args ...any) error {
 	sqlString = ds.formatSQL(sqlString)
-	var onRowArr []any
-	var queryArgs []any
-	hasParamsImplRc, hasParamsRefRc, err := ds.processExecParams(args, &onRowArr, &queryArgs)
-	if err != nil {
-		return err
-	}
-	if hasParamsImplRc || hasParamsRefRc {
-		return errUnexpectedInQuery()
-	}
-	rows, err := ds.querySqlx(ctx, sqlString, queryArgs...)
+	rows, err := ds.querySqlx(ctx, sqlString, args...)
 	if err != nil {
 		return err
 	}
@@ -795,10 +267,6 @@ func (ds *_DS) Query(ctx context.Context, sqlString string, destPtr any, args ..
 	}
 	if rows.Next() {
 		return errMultipleRows(sqlString)
-	}
-	err = assignPtrParams(values, queryArgs)
-	if err != nil {
-		return err
 	}
 	return nil
 }
@@ -957,7 +425,7 @@ func (ds *_DS) Select(ctx context.Context, sqlString string, dest any, args ...a
 		return err
 	}
 	defer _close(rows)
-	onRow, ok := dest.(func() (any, func()))
+	onRow, ok := dest.(func(func(any) error) error)
 	if ok {
 		for {
 			err := ds.fetchSqlxRows(rows, onRow)
@@ -992,7 +460,7 @@ func (ds *_DS) prepareFetch(rows *sqlx.Rows) (colNames []string, values []any, v
 	if err != nil {
 		return
 	}
-	// any is ok for SQLite3, Oracle, and SQL Server.
+	// any is ok for SQLite3.
 	// MySQL and PostgreSQL may require some convertors from []uint8
 	// https://github.com/ziutek/mymysql#type-mapping
 	values = make([]any, len(colNames))
@@ -1004,12 +472,7 @@ func (ds *_DS) prepareFetch(rows *sqlx.Rows) (colNames []string, values []any, v
 }
 
 func (ds *_DS) formatSQL(sqlString string) string {
-	if len(ds.paramPrefix) == 0 {
-		return sqlString
-	}
-	// https://jmoiron.github.io/sqlx/
-	// bindvars
-	return ds.db.Rebind(sqlString)
+	return sqlString // SQLite: ? as is
 }
 
 /////////////////////////////////////////////////////////////
@@ -1163,14 +626,14 @@ func _setFloat32(d *float32, value any) error {
 	case float64:
 		*d = float32(v)
 	case []byte:
-		str := string(v) // PostgeSQL
+		str := string(v) // PostgreSQL
 		d64, err := strconv.ParseFloat(str, 64)
 		if err != nil {
 			return assignErr(d, value, "_setFloat32", err.Error())
 		}
 		*d = float32(d64)
 	case string:
-		d64, err := strconv.ParseFloat(v, 64) // Oracle
+		d64, err := strconv.ParseFloat(v, 64)
 		if err != nil {
 			return assignErr(d, value, "_setFloat32", err.Error())
 		}
@@ -1193,8 +656,10 @@ func _setFloat64(d *float64, value any) error {
 		*d = v
 	case float32:
 		*d = float64(v)
+	case int64:
+		*d = float64(v) // SQLite: REAL/NUMERIC column with an integer value
 	case []byte:
-		str := string(v) // PostgeSQL, MySQL
+		str := string(v) // PostgreSQL, MySQL
 		var err error
 		*d, err = strconv.ParseFloat(str, 64)
 		if err != nil {
@@ -1202,7 +667,7 @@ func _setFloat64(d *float64, value any) error {
 		}
 	case string:
 		var err error
-		*d, err = strconv.ParseFloat(v, 64) // Oracle
+		*d, err = strconv.ParseFloat(v, 64)
 		if err != nil {
 			return assignErr(d, value, "_setFloat64", err.Error())
 		}
@@ -1303,6 +768,9 @@ func _copy(row map[string]any, col string, errMap map[string]int, fn func(value 
 			errMap[key] = 1
 		}
 		return
+	}
+	if value == nil {
+		return // NULL: the field keeps its zero value
 	}
 	err := fn(value)
 	if err == nil {
@@ -1450,10 +918,6 @@ func errNoRows(sqlString string) error {
 
 func errMultipleRows(sqlString string) error {
 	return errors.New(fmt.Sprintf("more than 1 row found for %s", sqlString))
-}
-
-func errUnexpectedInQuery() error {
-	return errors.New("not supported: 'query([onTest]) for implicit cursors', query(onTest) for out cursors")
 }
 
 func errNotInTx() error {

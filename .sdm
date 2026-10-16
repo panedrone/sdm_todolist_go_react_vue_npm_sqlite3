@@ -1,9 +1,8 @@
 --- sdm
 
-go-sdm/go.dal
-
 internal/gorm/sdm/go.dal
 internal/sqlx/sdm/go.dal
+internal/no_orm/sdm/go.dal
 
 --- etc
 

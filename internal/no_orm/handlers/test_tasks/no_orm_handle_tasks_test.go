@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"sdm_demo_todolist/internal/dbal"
-	"sdm_demo_todolist/internal/dbal/models"
+	"sdm_demo_todolist/internal/no_orm/dbal"
+	models2 "sdm_demo_todolist/internal/no_orm/dbal/models"
 	"sdm_demo_todolist/internal/no_orm/handlers"
 	"strings"
 	"testing"
@@ -35,13 +35,13 @@ func TestMain(m *testing.M) {
 		dbal.ReadByProject = origReadByProject
 	}()
 
-	dbal.CreateTask = func(ctx context.Context, t *models.Task) error {
+	dbal.CreateTask = func(ctx context.Context, t *models2.Task) error {
 		t.TID = 1
 		return nil
 	}
 
-	dbal.ReadTask = func(ctx context.Context, id int64) (*models.Task, error) {
-		return &models.Task{
+	dbal.ReadTask = func(ctx context.Context, id int64) (*models2.Task, error) {
+		return &models2.Task{
 			TID:       id,
 			PID:       1,
 			TSubject:  "demo",
@@ -50,16 +50,16 @@ func TestMain(m *testing.M) {
 		}, nil
 	}
 
-	dbal.UpdateTask = func(ctx context.Context, t *models.Task) (int64, error) {
+	dbal.UpdateTask = func(ctx context.Context, t *models2.Task) (int64, error) {
 		return 1, nil
 	}
 
-	dbal.DeleteTask = func(ctx context.Context, t *models.Task) (int64, error) {
+	dbal.DeleteTask = func(ctx context.Context, t *models2.Task) (int64, error) {
 		return 1, nil
 	}
 
-	dbal.ReadByProject = func(ctx context.Context, pid int64) ([]*models.TaskLi, error) {
-		return []*models.TaskLi{
+	dbal.ReadByProject = func(ctx context.Context, pid int64) ([]*models2.TaskLi, error) {
+		return []*models2.TaskLi{
 			{TID: 1, TSubject: "t1"},
 			{TID: 2, TSubject: "t2"},
 		}, nil
@@ -116,7 +116,7 @@ func TestTaskRead_NotFound(t *testing.T) {
 	orig := dbal.ReadTask
 	defer func() { dbal.ReadTask = orig }()
 
-	dbal.ReadTask = func(ctx context.Context, id int64) (*models.Task, error) {
+	dbal.ReadTask = func(ctx context.Context, id int64) (*models2.Task, error) {
 		return nil, sql.ErrNoRows
 	}
 

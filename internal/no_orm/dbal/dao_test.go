@@ -6,16 +6,15 @@ package dbal
 import (
 	"context"
 	"os"
+	models2 "sdm_demo_todolist/internal/no_orm/dbal/models"
 	"strconv"
 	"testing"
-
-	"sdm_demo_todolist/internal/dbal/models"
 )
 
 var ctx context.Context
 
 func TestMain(m *testing.M) {
-	_ = os.Chdir("../..") // ./db/todolist.sqlite — от корня проекта
+	_ = os.Chdir("../../..") // ./db/todolist.sqlite — от корня проекта
 	if err := Ds().Open(); err != nil {
 		panic(err.Error())
 	}
@@ -68,12 +67,12 @@ func TestTodolist(t *testing.T) {
 	// Задачи остаются (среди них есть и без проекта), счёт — от base.
 	for _, p := range must(t, "ReadAll", r(ReadAll(ctx))) {
 		must(t, "DelByProject", r(DelByProject(ctx, strconv.FormatInt(p.PID, 10))))
-		one(t, "DeleteProject", r(DeleteProject(ctx, &models.Project{PID: p.PID})))
+		one(t, "DeleteProject", r(DeleteProject(ctx, &models2.Project{PID: p.PID})))
 	}
 	base := must(t, "GetCount", r(GetCount(ctx)))
 
 	// projects: CRUD
-	p := &models.Project{PName: "Test project"}
+	p := &models2.Project{PName: "Test project"}
 	noErr(t, "CreateProject", CreateProject(ctx, p))
 	if p.PID == 0 {
 		t.Fatal("CreateProject: p_id is not returned")
@@ -85,7 +84,7 @@ func TestTodolist(t *testing.T) {
 	}
 
 	// одна строка в projects — запросы скаляров
-	if id := must(t, "PID", r(PID(ctx))); id != p.PID {
+	if id := must(t, "PID", r(PIdFirst(ctx))); id != p.PID {
 		t.Errorf("PID: %d", id)
 	}
 	if id := must(t, "ProjectID", r(ProjectID(ctx, strconv.FormatInt(p.PID, 10)))); id != p.PID {
@@ -106,7 +105,7 @@ func TestTodolist(t *testing.T) {
 	}
 
 	// tasks: CRUD
-	task := &models.Task{PID: p.PID, TPriority: 2, TDate: "2026-10-11", TSubject: "Test task", TComments: "c"}
+	task := &models2.Task{PID: p.PID, TPriority: 2, TDate: "2026-10-11", TSubject: "Test task", TComments: "c"}
 	noErr(t, "CreateTask", CreateTask(ctx, task))
 	if task.TID == 0 {
 		t.Fatal("CreateTask: t_id is not returned")
@@ -116,7 +115,7 @@ func TestTodolist(t *testing.T) {
 	if got := must(t, "ReadTask", r(ReadTask(ctx, task.TID))); *got != *task {
 		t.Errorf("ReadTask: %+v, want %+v", *got, *task)
 	}
-	task2 := &models.Task{PID: p.PID, TPriority: 1, TDate: "2026-10-12", TSubject: "Second task"}
+	task2 := &models2.Task{PID: p.PID, TPriority: 1, TDate: "2026-10-12", TSubject: "Second task"}
 	noErr(t, "CreateTask", CreateTask(ctx, task2))
 
 	if list := must(t, "ReadTaskList", r(ReadTaskList(ctx))); int64(len(list)) != base+2 {

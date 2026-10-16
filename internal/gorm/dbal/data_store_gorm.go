@@ -26,9 +26,7 @@ var DS func(context context.Context) DataStore
 
 		- "gorm.io/driver/sqlite"
 		- "gorm.io/driver/postgres"
-		- "gorm.io/driver/sqlserver"
 		- "gorm.io/driver/mysql"
-		- "github.com/cengsin/oracle" // bugs of AutoMigrate
 
 	Copy-paste this code to your project and change it for your needs.
 	Improvements are welcome: sqldalmaker@gmail.com
@@ -66,119 +64,15 @@ type DataStore interface {
 	Select(ctx context.Context, sqlString string, fa any, args ...any) error
 }
 
-func FetchSql(cursor string) string {
-	return fmt.Sprintf(`fetch all from "%s"`, cursor)
-}
-
-type Out struct {
-	/*
-		var outParam float64 // no need to init
-		cxDao.SpTestOutParams(47, Out{Dest: &outParam})
-		// cxDao.SpTestOutParams(47, &outParam) // <- this one is also ok for OUT parameters
-		fmt.Println(outParam)
-
-		// not working in MySQL, see https://sqldalmaker.sourceforge.net/sp-udf.html#mysql_out_params
-	*/
-
-	// Dest is a pointer to the value that will be set to the result of the
-	// stored procedure's OUT parameter.
-	Dest any
-}
-
-type InOut struct {
-	/*
-		inOutParam := 123.0 // must be initialized for INOUT
-		cxDao.SpTestInoutParams(InOut{Dest: &inOutParam})
-		fmt.Println(inOutParam)
-
-		// not working in MySQL, see https://sqldalmaker.sourceforge.net/sp-udf.html#mysql_out_params
-	*/
-
-	// Dest is a pointer to the value that will be set to the result of the
-	// stored procedure's OUT parameter.
-	Dest any
-}
-
 type _DS struct {
-	paramPrefix string
-	rootDb      *gorm.DB
+	rootDb *gorm.DB
 }
 
 func _close(obj io.Closer) {
 	_ = obj.Close()
 }
 
-func (ds *_DS) isPgSql() bool {
-	return ds.paramPrefix == "$"
-}
-
-func (ds *_DS) isOracle() bool {
-	return ds.paramPrefix == ":"
-}
-
-func (ds *_DS) isMsSql() bool {
-	return ds.paramPrefix == "@p"
-}
-
-/*
-	Implement the method initDb() in an external file (e.g. "gorm_store_ex.go"):
-
-package dbal
-
-import (
-	"github.com/cengsin/oracle"
-	// "github.com/go-sql-driver/mysql"
-	// "gorm.io/driver/postgres"
-	// "gorm.io/driver/sqlite"
-	// "gorm.io/driver/sqlserver"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-)
-
-func (ds *_DS) initDb() (err error) {
-	// === SQLite ==============================
-	//ds.rootDb, err = gorm.Open(sqlite.Open("./todolist.sqlite"), &gorm.Config{
-	//	Logger: logger.Default.LogMode(logger.Info),
-	//})
-	// === PostgeSQL ===========================
-	// ds.paramPrefix = "$"
-	//dsn := "host=localhost user=postgres password=sa dbname=my_tests port=5432 sslmode=disable"
-	//ds.rootDb, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
-	//	Logger: logger.Default.LogMode(logger.Info),
-	//})
-	// === MySQL ===============================
-	//dsn := "root:sa@tcp(127.0.0.1:3306)/my_tests?charset=utf8mb4&parseTime=True&loc=Local"
-	//ds.rootDb, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
-	//	Logger: logger.Default.LogMode(logger.Info),
-	//})
-	// === Oracle ==============================
-	ds.paramPrefix = ":"
-	dsn := "MY_TESTS/sa@127.0.0.1:1521/XE?charset=utf8mb4&parseTime=True&loc=Local"
-	ds.rootDb, err = gorm.Open(oracle.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
-	})
-	// === SQL Server ==============================
-	//ds.paramPrefix = "@p"
-	//github.com/denisenkom/go-mssqldb
-	//dsn := "sqlserver://sa:LoremIpsum86@localhost:1433?database=WideWorldImporters"
-	//ds.rootDb, err = gorm.Open(sqlserver.Open(dsn), &gorm.Config{
-	//  Logger: logger.Default.LogMode(logger.Info),
-	//})
-	return
-}
-
-var _ds = &_DS{}
-
-func Ds() DataStore {
-	return _ds
-}
-
-func NewTasksDao() *TasksDao {
-	return &TasksDao{ds: ds}
-}
-
-*/
-
+// Open — initDb is in data_store_gorm_ex.go
 func (ds *_DS) Open() error {
 	return ds.initDb()
 }
@@ -290,338 +184,14 @@ func (ds *_DS) rawExec(ctx context.Context, sqlString string, args ...any) (rows
 	return res.RowsAffected, res.Error
 }
 
-func isPtr(p any) bool {
-	val := reflect.ValueOf(p)
-	kindOfJ := val.Kind()
-	return kindOfJ == reflect.Ptr
-}
-
-func pointsToNil(p any) bool {
-	switch d := p.(type) {
-	case *any:
-		pointsTo := *d
-		return pointsTo == nil
-	}
-	return false
-}
-
-func validateDest(dest any) (err error) {
-	if dest == nil {
-		err = errors.New("Out/InOut -> Dest is nil")
-	} else if !isPtr(dest) {
-		err = errors.New("Out/InOut -> Dest must be a Ptr")
-	} else if pointsToNil(dest) {
-		err = errors.New("Out/InOut -> Dest points to nil")
-	}
-	return
-}
-
-func (ds *_DS) processExecParams(args []any, onRowArr *[]any, queryArgs *[]any) (hasParamsImplRc bool, hasParamsOutRc bool, err error) {
-	for _, arg := range args {
-		switch param := arg.(type) {
-		case []func(map[string]any):
-			if hasParamsOutRc {
-				err = errUnexpectedType(args)
-				return
-			}
-			hasParamsImplRc = true
-			for _, fn := range param {
-				*onRowArr = append(*onRowArr, fn)
-			}
-		case func(map[string]any):
-			if hasParamsImplRc {
-				err = errUnexpectedType(args)
-				return
-			}
-			hasParamsOutRc = true
-			*onRowArr = append(*onRowArr, param) // add single func
-			var rows driver.Rows
-			*queryArgs = append(*queryArgs, sql.Out{Dest: &rows, In: false})
-		case []any:
-			if hasParamsOutRc {
-				err = errUnexpectedType(args)
-				return
-			}
-			hasParamsImplRc = true
-			for _, fn := range param {
-				_, ok1 := fn.(func() (any, func()))
-				_, ok2 := fn.(func(map[string]any))
-				if !ok1 && !ok2 {
-					err = errors.New(fmt.Sprintf("Expected: 'func(map[string]any)' || "+
-						"'func() (any, func())'. Got: %v", reflect.TypeOf(fn)))
-					return
-				}
-				*onRowArr = append(*onRowArr, fn)
-			}
-		case func() (any, func()), func() ([]any, func()):
-			if hasParamsImplRc {
-				err = errUnexpectedType(args)
-				return
-			}
-			hasParamsOutRc = true
-			*onRowArr = append(*onRowArr, param) // add single func
-			var rows driver.Rows
-			*queryArgs = append(*queryArgs, sql.Out{Dest: &rows, In: false})
-		case *Out:
-			err = validateDest(param.Dest)
-			if err != nil {
-				return
-			}
-			*queryArgs = append(*queryArgs, sql.Out{Dest: param.Dest, In: false})
-		case Out:
-			err = validateDest(param.Dest)
-			if err != nil {
-				return
-			}
-			*queryArgs = append(*queryArgs, sql.Out{Dest: param.Dest, In: false})
-		case *InOut:
-			err = validateDest(param.Dest)
-			if err != nil {
-				return
-			}
-			*queryArgs = append(*queryArgs, sql.Out{Dest: param.Dest, In: true})
-		case InOut:
-			err = validateDest(param.Dest)
-			if err != nil {
-				return
-			}
-			*queryArgs = append(*queryArgs, sql.Out{Dest: param.Dest, In: true})
-		default:
-			if isPtr(arg) {
-				if pointsToNil(arg) {
-					err = errors.New("arg points to nil")
-					return
-				}
-				if ds.isOracle() {
-					*queryArgs = append(*queryArgs, sql.Out{Dest: arg, In: false})
-				} else {
-					*queryArgs = append(*queryArgs, arg) // PostgreSQL
-				}
-			} else {
-				*queryArgs = append(*queryArgs, arg)
-			}
-		}
-	}
-	// Syntax like [on_test1:Test, on_test2:Test] is used to call SP with IMPLICIT cursors
-	return
-}
-
-func (ds *_DS) queryImplRcOracle(ctx context.Context, sqlString string, onRowArr []any, queryArgs ...any) error {
-	rows, err := ds.rawQuery(ctx, sqlString, queryArgs...)
-	if err != nil {
-		return err
-	}
-	defer _close(rows)
-	onRowIndex := 0
-	for {
-		// 1) unlike MySQL, NextResultSet must be called before _prepareFetch -> rows.Next()
-		// 2) it does not work with multiple Implicit RC + early versions of Driver
-		if !rows.NextResultSet() {
-			break
-		}
-		switch onRow := onRowArr[onRowIndex].(type) {
-		case func(map[string]any):
-			// re-detect columns for each ResultSet
-			colNames, data, values, valuePointers, err := ds.prepareFetch(rows)
-			if err != nil {
-				return err
-			}
-			for rows.Next() {
-				err = rows.Scan(valuePointers...)
-				if err != nil {
-					return err
-				}
-				for i, col := range colNames {
-					data[col] = values[i]
-				}
-				onRow(data)
-			}
-		case func() (any, func()):
-			err = fetchRows(rows, onRow)
-			if err != nil {
-				return err
-			}
-		default:
-			return errUnexpectedType(onRow)
-		}
-		onRowIndex++
-	}
-	return nil
-}
-
-func fetchRows(rows *sql.Rows, onRow func() (any, func())) (err error) {
-	for rows.Next() {
-		fa, onRowCompleted := onRow()
-		switch _fa := fa.(type) {
-		case []any:
-			err = rows.Scan(_fa...)
-		default:
-			err = errUnexpectedType(_fa)
-		}
-		if err != nil {
-			return
-		}
-		onRowCompleted()
-	}
-	return
-}
-
-func (ds *_DS) queryImplRc(ctx context.Context, sqlString string, onRowArr []any, queryArgs ...any) error {
-	rows, err := ds.rawQuery(ctx, sqlString, queryArgs...)
-	if err != nil {
-		return err
-	}
-	defer _close(rows)
-	onRowIndex := 0
-	for {
-		switch onRow := onRowArr[onRowIndex].(type) {
-		case func(map[string]any):
-			// re-detect columns for each ResultSet
-			colNames, data, values, valuePointers, err := ds.prepareFetch(rows)
-			if err != nil {
-				return err
-			}
-			for rows.Next() {
-				err = rows.Scan(valuePointers...)
-				if err != nil {
-					return err
-				}
-				for i, col := range colNames {
-					data[col] = values[i]
-				}
-				onRow(data)
-			}
-		case func() (any, func()):
-			err = fetchRows(rows, onRow)
-			if err != nil {
-				return err
-			}
-		default:
-			return errUnexpectedType(onRow)
-		}
-		if !rows.NextResultSet() {
-			break // no result sets in pg
-		}
-		onRowIndex++
-	}
-	return nil
-}
-
-func (ds *_DS) exec2(ctx context.Context, sqlString string, onRowArr []any, args ...any) (rowsAffected int64, err error) {
-	rowsAffected, err = ds.rawExec(ctx, sqlString, args...)
-	if err != nil {
-		return
-	}
-	onRowIndex := 0
-	for _, arg := range args {
-		switch param := arg.(type) {
-		case sql.Out:
-			if param.Dest != nil {
-				switch rows := param.Dest.(type) {
-				case *driver.Rows:
-					onRow := onRowArr[onRowIndex]
-					err = fetchDriverRows(*rows, onRow)
-					if err != nil {
-						return
-					}
-					onRowIndex++
-				}
-			}
-		}
-	}
-	return
-}
-
-func fetchDriverRows(rows driver.Rows, onRowFunc any) error {
-	defer _close(rows)
-	colNames := rows.Columns()
-	values := make([]driver.Value, len(colNames))
-	switch onRow := onRowFunc.(type) {
-	case func(map[string]any):
-		data := make(map[string]any)
-		for {
-			err := rows.Next(values)
-			if err != nil {
-				break
-			}
-			for i, col := range colNames {
-				data[col] = values[i]
-			}
-			onRow(data)
-		}
-	case func() (any, func()):
-		for {
-			err := rows.Next(values)
-			if err != nil {
-				if "EOF" == err.Error() {
-					break
-				}
-				return err
-			}
-			fa, onRowCompleted := onRow()
-			switch _fa := fa.(type) {
-			case []any:
-				for i, v := range values {
-					err = _setAny(_fa[i], v)
-					if err != nil {
-						return err
-					}
-				}
-				onRowCompleted()
-			default:
-				return errUnexpectedType(fa)
-			}
-		}
-	default:
-		return errUnexpectedType(onRowFunc)
-	}
-	return nil
-}
-
-func assignPtrParams(values []any, queryArgs []any) error {
-	for i, arg := range queryArgs {
-		if isPtr(arg) {
-			err := SetRes(arg, values[i])
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
 func (ds *_DS) Exec(ctx context.Context, sqlString string, args ...any) (rowsAffected int64, err error) {
 	sqlString = ds.formatSQL(sqlString)
-	var onRowArr []any
-	var queryArgs []any
-	// Syntax like [on_test1:Test, on_test2:Test] is used to call SP with IMPLICIT cursors
-	hasImplRcParams, _, err := ds.processExecParams(args, &onRowArr, &queryArgs)
-	if err != nil {
-		return
-	}
-	if hasImplRcParams {
-		if ds.isOracle() {
-			return 0, ds.queryImplRcOracle(ctx, sqlString, onRowArr, queryArgs...)
-		}
-		// it works with MySQL SP and PgSQL
-		return 0, ds.queryImplRc(ctx, sqlString, onRowArr, queryArgs...)
-	}
-	return ds.exec2(ctx, sqlString, onRowArr, queryArgs...)
+	return ds.rawExec(ctx, sqlString, args...)
 }
 
 func (ds *_DS) Query(ctx context.Context, sqlString string, destPtr any, args ...any) error {
 	sqlString = ds.formatSQL(sqlString)
-	var onRowArr []any
-	var queryArgs []any
-	implicitCursors, outCursors, err := ds.processExecParams(args, &onRowArr, &queryArgs)
-	if err != nil {
-		return err
-	}
-	if implicitCursors || outCursors {
-		err = errUnexpectedInQuery()
-		return err
-	}
-	rows, err := ds.rawQuery(ctx, sqlString, queryArgs...)
+	rows, err := ds.rawQuery(ctx, sqlString, args...)
 	if err != nil {
 		return err
 	}
@@ -643,10 +213,6 @@ func (ds *_DS) Query(ctx context.Context, sqlString string, destPtr any, args ..
 	}
 	if rows.Next() {
 		return errMultipleRows(sqlString)
-	}
-	err = assignPtrParams(values, queryArgs)
-	if err != nil {
-		return err
 	}
 	return nil
 }
@@ -836,7 +402,7 @@ func (ds *_DS) Select(ctx context.Context, sqlString string, dest any, args ...a
 		}
 		return nil
 	}
-	onRow, ok := dest.(func() (any, func()))
+	onRow, ok := dest.(func(func(any) error) error)
 	if ok {
 		rows, err := ds.rawQuery(ctx, sqlString, args...)
 		if err != nil {
@@ -856,20 +422,20 @@ func (ds *_DS) Select(ctx context.Context, sqlString string, dest any, args ...a
 	return raw.Take(dest).Error
 }
 
-func fetchAll(rows *sql.Rows, onRow func() (any, func())) (err error) {
+func fetchAll(rows *sql.Rows, onRow func(func(any) error) error) (err error) {
+	scan := func(fa any) error {
+		faArr, ok := fa.([]any)
+		if !ok {
+			return errUnexpectedType(fa)
+		}
+		return rows.Scan(faArr...)
+	}
 	for {
 		for rows.Next() {
-			fa, onRowComplete := onRow()
-			faArr, ok := fa.([]any)
-			if ok {
-				err = rows.Scan(faArr...)
-			} else {
-				err = errUnexpectedType(fa)
-			}
+			err = onRow(scan)
 			if err != nil {
 				return
 			}
-			onRowComplete()
 		}
 		if !rows.NextResultSet() {
 			return
@@ -883,7 +449,7 @@ func (ds *_DS) prepareFetch(rows *sql.Rows) (colNames []string, data map[string]
 		return
 	}
 	data = make(map[string]any)
-	// any is ok for SQLite3, Oracle, and SQL Server.
+	// any is ok for SQLite3.
 	// MySQL and PostgreSQL may require some convertors from []uint8
 	// https://github.com/ziutek/mymysql#type-mapping
 	values = make([]any, len(colNames))
@@ -894,24 +460,8 @@ func (ds *_DS) prepareFetch(rows *sql.Rows) (colNames []string, data map[string]
 	return
 }
 
+// formatSQL — gorm takes ? for every database
 func (ds *_DS) formatSQL(sqlString string) string {
-
-	// === seems that '?' is ok for GORM
-
-	//if len(ds.paramPrefix) == 0 {
-	//	return sqlString
-	//}
-	//i := 1
-	//for {
-	//	pos := strings.Index(sqlString, "?")
-	//	if pos == -1 {
-	//		break
-	//	}
-	//	str1 := sqlString[0:pos]
-	//	str2 := sqlString[pos+1:]
-	//	sqlString = str1 + ds.paramPrefix + strconv.Itoa(i) + str2
-	//	i += 1
-	//}
 	return sqlString
 }
 
@@ -1066,14 +616,14 @@ func _setFloat32(d *float32, value any) error {
 	case float64:
 		*d = float32(v)
 	case []byte:
-		str := string(v) // PostgeSQL
+		str := string(v) // PostgreSQL
 		d64, err := strconv.ParseFloat(str, 64)
 		if err != nil {
 			return assignErr(d, value, "_setFloat32", err.Error())
 		}
 		*d = float32(d64)
 	case string:
-		d64, err := strconv.ParseFloat(v, 64) // Oracle
+		d64, err := strconv.ParseFloat(v, 64)
 		if err != nil {
 			return assignErr(d, value, "_setFloat32", err.Error())
 		}
@@ -1096,8 +646,10 @@ func _setFloat64(d *float64, value any) error {
 		*d = v
 	case float32:
 		*d = float64(v)
+	case int64:
+		*d = float64(v) // SQLite: REAL/NUMERIC column with an integer value
 	case []byte:
-		str := string(v) // PostgeSQL, MySQL
+		str := string(v) // PostgreSQL, MySQL
 		var err error
 		*d, err = strconv.ParseFloat(str, 64)
 		if err != nil {
@@ -1105,7 +657,7 @@ func _setFloat64(d *float64, value any) error {
 		}
 	case string:
 		var err error
-		*d, err = strconv.ParseFloat(v, 64) // Oracle
+		*d, err = strconv.ParseFloat(v, 64)
 		if err != nil {
 			return assignErr(d, value, "_setFloat64", err.Error())
 		}
@@ -1206,6 +758,9 @@ func _copy(row map[string]any, col string, errMap map[string]int, fn func(value 
 			errMap[key] = 1
 		}
 		return
+	}
+	if value == nil {
+		return // NULL: the field keeps its zero value
 	}
 	err := fn(value)
 	if err == nil {
@@ -1353,10 +908,6 @@ func errNoRows(sqlString string) error {
 
 func errMultipleRows(sqlString string) error {
 	return errors.New(fmt.Sprintf("more than 1 row found for %s", sqlString))
-}
-
-func errUnexpectedInQuery() error {
-	return errors.New("not supported: 'query([onTest]) for implicit cursors', query(onTest) for out cursors")
 }
 
 func errNotInTx() error {
