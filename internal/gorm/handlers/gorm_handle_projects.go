@@ -3,11 +3,11 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"sdm_demo_todolist/internal/etc"
+	request2 "sdm_demo_todolist/internal/etc/request"
+	"sdm_demo_todolist/internal/etc/resp"
 	"sdm_demo_todolist/internal/gorm/dbal"
 	m "sdm_demo_todolist/internal/gorm/dbal/models"
-	"sdm_demo_todolist/pkg"
-	"sdm_demo_todolist/pkg/request"
-	"sdm_demo_todolist/pkg/resp"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -32,8 +32,8 @@ func NewGormProjectHandlers() etc.ProjectHandlers {
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /projects [post]
 func (h *projectHandlers) ProjectCreate(ctx *gin.Context) {
-	var req request.Project
-	if err := request.BindJSON(ctx, &req); err != nil {
+	var req request2.Project
+	if err := request2.BindJSON(ctx, &req); err != nil {
 		return
 	}
 	if err := dbal.CreateProject(ctx, &m.Project{PName: req.PName}); err != nil {
@@ -72,7 +72,7 @@ func (h *projectHandlers) ProjectsReadAll(ctx *gin.Context) {
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /projects/{p_id} [get]
 func (h *projectHandlers) ProjectRead(ctx *gin.Context) {
-	uri, err := request.BindProjectUri(ctx)
+	uri, err := request2.BindProjectUri(ctx)
 	if err != nil {
 		return
 	}
@@ -101,12 +101,12 @@ func (h *projectHandlers) ProjectRead(ctx *gin.Context) {
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /projects/{p_id} [put]
 func (h *projectHandlers) ProjectUpdate(ctx *gin.Context) {
-	uri, err := request.BindProjectUri(ctx)
+	uri, err := request2.BindProjectUri(ctx)
 	if err != nil {
 		return
 	}
-	var req request.Project
-	if err := request.BindJSON(ctx, &req); err != nil {
+	var req request2.Project
+	if err := request2.BindJSON(ctx, &req); err != nil {
 		return
 	}
 	pr := &m.Project{PID: uri.PId, PName: req.PName}
@@ -125,7 +125,7 @@ func (h *projectHandlers) ProjectUpdate(ctx *gin.Context) {
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /projects/{p_id} [delete]
 func (h *projectHandlers) ProjectDelete(ctx *gin.Context) {
-	uri, err := request.BindProjectUri(ctx)
+	uri, err := request2.BindProjectUri(ctx)
 	if err != nil {
 		return
 	}

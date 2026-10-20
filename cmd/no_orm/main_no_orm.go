@@ -1,9 +1,9 @@
 package main
 
 import (
+	"sdm_demo_todolist/internal/etc"
 	"sdm_demo_todolist/internal/no_orm/dbal"
 	handlers2 "sdm_demo_todolist/internal/no_orm/handlers"
-	"sdm_demo_todolist/pkg"
 
 	"github.com/gin-gonic/gin"
 )

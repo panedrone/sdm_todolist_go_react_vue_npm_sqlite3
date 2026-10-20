@@ -1,7 +1,7 @@
 package request
 
 import (
-	"sdm_demo_todolist/pkg/resp"
+	"sdm_demo_todolist/internal/etc/resp"
 
 	"github.com/gin-gonic/gin"
 )

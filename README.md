@@ -44,7 +44,7 @@ What it does in this project:
 go test ./internal/dbal/
 ```
 
-Front-end is written in both React 18.2.0 and Vue 3.5.32. Switch in [handlers.go](pkg/handlers.go).
+Front-end is written in both React 18.2.0 and Vue 3.5.32. Switch in [handlers.go](internal/etc/handlers.go).
 
 ![sdm-todo-app.png](sdm-todo-app.png)
 

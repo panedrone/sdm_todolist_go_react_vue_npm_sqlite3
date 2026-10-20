@@ -4,12 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sdm_demo_todolist/internal/etc"
+	"sdm_demo_todolist/internal/etc/datetime"
+	request2 "sdm_demo_todolist/internal/etc/request"
+	"sdm_demo_todolist/internal/etc/resp"
 	"sdm_demo_todolist/internal/gorm/dbal"
 	"sdm_demo_todolist/internal/gorm/dbal/models"
-	"sdm_demo_todolist/pkg"
-	"sdm_demo_todolist/pkg/datetime"
-	"sdm_demo_todolist/pkg/request"
-	"sdm_demo_todolist/pkg/resp"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -35,12 +35,12 @@ func NewGormTaskHandlers() etc.TaskHandlers {
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /projects/{p_id}/tasks [post]
 func (h *taskHandlers) TaskCreate(ctx *gin.Context) {
-	uri, err := request.BindProjectUri(ctx)
+	uri, err := request2.BindProjectUri(ctx)
 	if err != nil {
 		return
 	}
-	var req request.NewTask
-	if err := request.BindJSON(ctx, &req); err != nil {
+	var req request2.NewTask
+	if err := request2.BindJSON(ctx, &req); err != nil {
 		return
 	}
 	t := models.Task{}
@@ -67,7 +67,7 @@ func (h *taskHandlers) TaskCreate(ctx *gin.Context) {
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /tasks/{t_id} [get]
 func (h *taskHandlers) TaskRead(ctx *gin.Context) {
-	uri, err := request.BindTaskUri(ctx)
+	uri, err := request2.BindTaskUri(ctx)
 	if err != nil {
 		return
 	}
@@ -94,7 +94,7 @@ func (h *taskHandlers) TaskRead(ctx *gin.Context) {
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /projects/{p_id}/tasks [get]
 func (h *taskHandlers) TasksReadByProject(ctx *gin.Context) {
-	uri, err := request.BindProjectUri(ctx)
+	uri, err := request2.BindProjectUri(ctx)
 	if err != nil {
 		return
 	}
@@ -120,7 +120,7 @@ func (h *taskHandlers) TasksReadByProject(ctx *gin.Context) {
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /tasks/{t_id} [put]
 func (h *taskHandlers) TaskUpdate(ctx *gin.Context) {
-	uri, err := request.BindTaskUri(ctx)
+	uri, err := request2.BindTaskUri(ctx)
 	if err != nil {
 		return
 	}
@@ -130,7 +130,7 @@ func (h *taskHandlers) TaskUpdate(ctx *gin.Context) {
 		return
 	}
 	var req models.Task
-	if err := request.BindJSON(ctx, &req); err != nil {
+	if err := request2.BindJSON(ctx, &req); err != nil {
 		return
 	}
 	errDetails := make(map[string]string)
@@ -173,7 +173,7 @@ func (h *taskHandlers) TaskUpdate(ctx *gin.Context) {
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /tasks/{t_id} [delete]
 func (h *taskHandlers) TaskDelete(ctx *gin.Context) {
-	uri, err := request.BindTaskUri(ctx)
+	uri, err := request2.BindTaskUri(ctx)
 	if err != nil {
 		return
 	}

@@ -5,12 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sdm_demo_todolist/internal/etc"
+	"sdm_demo_todolist/internal/etc/datetime"
+	request2 "sdm_demo_todolist/internal/etc/request"
+	"sdm_demo_todolist/internal/etc/resp"
 	"sdm_demo_todolist/internal/sqlx/dbal"
 	"sdm_demo_todolist/internal/sqlx/dbal/dto"
-	"sdm_demo_todolist/pkg"
-	"sdm_demo_todolist/pkg/datetime"
-	"sdm_demo_todolist/pkg/request"
-	"sdm_demo_todolist/pkg/resp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,11 +36,11 @@ func NewSqlxTaskHandlers() etc.TaskHandlers {
 //	@Router		/projects/{p_id}/tasks [post]
 //	@Param		p_id	path	integer	true	"project id"
 func (h *taskHandlers) TaskCreate(ctx *gin.Context) {
-	uri, err := request.BindProjectUri(ctx)
+	uri, err := request2.BindProjectUri(ctx)
 	if err != nil {
 		return
 	}
-	var inTask request.NewTask
+	var inTask request2.NewTask
 	if err := ctx.ShouldBindJSON(&inTask); err != nil {
 		resp.Abort400hBadRequest(ctx, err.Error())
 		return
@@ -69,7 +69,7 @@ func (h *taskHandlers) TaskCreate(ctx *gin.Context) {
 //	@Router		/projects/{p_id}/tasks [get]
 //	@Param		p_id	path	integer	true	"project id"
 func (h *taskHandlers) TasksReadByProject(ctx *gin.Context) {
-	uri, err := request.BindProjectUri(ctx)
+	uri, err := request2.BindProjectUri(ctx)
 	if err != nil {
 		return
 	}
@@ -95,7 +95,7 @@ func (h *taskHandlers) TasksReadByProject(ctx *gin.Context) {
 //	@Router		/tasks/{t_id} [get]
 //	@Param		t_id	path	integer	true	"task id"
 func (h *taskHandlers) TaskRead(ctx *gin.Context) {
-	uri, err := request.BindTaskUri(ctx)
+	uri, err := request2.BindTaskUri(ctx)
 	if err != nil {
 		return
 	}
@@ -125,7 +125,7 @@ func (h *taskHandlers) TaskRead(ctx *gin.Context) {
 //	@Param		t_id	path	integer		true	"task id"
 //	@Param		json	body	dto.Task	true	"task data"
 func (h *taskHandlers) TaskUpdate(ctx *gin.Context) {
-	uri, err := request.BindTaskUri(ctx)
+	uri, err := request2.BindTaskUri(ctx)
 	if err != nil {
 		return
 	}
@@ -135,7 +135,7 @@ func (h *taskHandlers) TaskUpdate(ctx *gin.Context) {
 		return
 	}
 	var req dto.Task
-	if err := request.BindJSON(ctx, &req); err != nil {
+	if err := request2.BindJSON(ctx, &req); err != nil {
 		return
 	}
 	errDetails := make(map[string]string)
@@ -180,7 +180,7 @@ func (h *taskHandlers) TaskUpdate(ctx *gin.Context) {
 //	@Router		/tasks/{t_id} [delete]
 //	@Param		t_id	path	integer	true	"task id"
 func (h *taskHandlers) TaskDelete(ctx *gin.Context) {
-	uri, err := request.BindTaskUri(ctx)
+	uri, err := request2.BindTaskUri(ctx)
 	if err != nil {
 		return
 	}

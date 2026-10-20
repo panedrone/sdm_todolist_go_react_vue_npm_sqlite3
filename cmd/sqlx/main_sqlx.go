@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"sdm_demo_todolist/internal/etc"
 	"sdm_demo_todolist/internal/sqlx/dbal"
 	"sdm_demo_todolist/internal/sqlx/handlers"
 	"sdm_demo_todolist/internal/sqlx/swagger"
-	"sdm_demo_todolist/pkg"
 
 	"github.com/gin-gonic/gin"
 )
