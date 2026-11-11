@@ -3,6 +3,8 @@ package dbal
 import (
 	"context"
 
+	"sdm_demo_todolist/internal/dbfile"
+
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -12,7 +14,11 @@ import (
 var _ds = &_DS{} // private for this package
 
 func (ds *_DS) initDb() (err error) {
-	ds.rootDb, err = gorm.Open(sqlite.Open("./db/todolist.sqlite"), &gorm.Config{
+	path, err := dbfile.Find()
+	if err != nil {
+		return err
+	}
+	ds.rootDb, err = gorm.Open(sqlite.Open(path), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	DS = func(ctx context.Context) DataStore {

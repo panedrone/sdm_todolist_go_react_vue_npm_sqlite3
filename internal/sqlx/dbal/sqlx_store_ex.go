@@ -3,6 +3,8 @@ package dbal
 import (
 	"context"
 
+	"sdm_demo_todolist/internal/dbfile"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	// _ "github.com/denisenkom/go-mssqldb" // SQL Server
@@ -15,7 +17,11 @@ import (
 var ds = &_DS{}
 
 func (ds *_DS) initDb() (err error) {
-	ds.db, err = sqlx.Open("sqlite3", "./db/todolist.sqlite")
+	path, err := dbfile.Find()
+	if err != nil {
+		return err
+	}
+	ds.db, err = sqlx.Open("sqlite3", path)
 	// === PostgeSQL ===========================
 	//ds.paramPrefix = "$"
 	//ds.db, err = sqlx.Open("postgres", "postgres://postgres:sa@localhost/my-test_tasks?sslmode=disable")

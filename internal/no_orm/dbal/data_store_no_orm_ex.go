@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"os"
+	"sdm_demo_todolist/internal/dbfile"
 
 	_ "github.com/mattn/go-sqlite3" // SQLite3, cgo; without cgo: modernc.org/sqlite, driver "sqlite"
 )
@@ -11,7 +12,10 @@ import (
 func (ds *_DS) initDb() (err error) {
 	file := os.Getenv("DATABASE_URL") // path to the database file
 	if file == "" {
-		file = "./db/todolist.sqlite"
+		file, err = dbfile.Find()
+		if err != nil {
+			return err
+		}
 	}
 	ds.db, err = sql.Open("sqlite3", file)
 	return

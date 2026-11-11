@@ -13,7 +13,7 @@
     <jdbc jar="lib/sqlite-jdbc-3.53.2.1.jar" class="org.sqlite.JDBC"
           url="jdbc:sqlite:$PROJECT_DIR$/db/todolist.sqlite" user="" pwd=""/>
 
-    <go-db url="sqlite:db/todolist.sqlite" user="" pwd=""/>
+    <db url="sqlite:db/todolist.sqlite" user="" pwd=""/>
 
     <type-map default="">
 
