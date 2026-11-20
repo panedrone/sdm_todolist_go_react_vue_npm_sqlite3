@@ -1,3 +1,5 @@
+# <img src="docs/img/gopher.svg" alt="Go gopher" height="44" align="absmiddle"> sdm_todolist_go_react_vue_npm_sqlite3
+
 # About
 
 ```
