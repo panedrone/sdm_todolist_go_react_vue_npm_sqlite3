@@ -1,7 +1,5 @@
 # <img src="docs/img/gopher.svg" alt="Go gopher" height="44" align="absmiddle"> sdm_todolist_go_react_vue_npm_sqlite3
 
-# About
-
 ```
 ┌───────────────────────────────────────────────────┐
 │                  panedrone's sdm                  │
@@ -18,6 +16,10 @@ A project demonstrating how to use [SQL DAL Maker](https://github.com/panedrone/
 [Part 2](internal/sqlx): using "github.com/jmoiron/sqlx"<br/>
 [Part 3](internal/no_orm): using "database/sql" directly
 
+Front-end is written in both React 18.2.0 and Vue 3.5.32. Switch in [handlers.go](internal/etc/handlers.go).
+
+![sdm-todo-app.png](sdm-todo-app.png)
+
 # sdmc
 
 [sdmc](https://github.com/panedrone/sdmc) is SQL DAL Maker as a command-line tool, no IDE needed.
@@ -30,14 +32,8 @@ go install github.com/panedrone/sdmc/cmd/sdmc@latest
 sdmc gen -c all   # models and DAO of all three parts
 sdmc val -c all   # for CI: exit 1 if the generated code is out of date
 ```
-
-Front-end is written in both React 18.2.0 and Vue 3.5.32. Switch in [handlers.go](internal/etc/handlers.go).
-
-![sdm-todo-app.png](sdm-todo-app.png)
-
 # News
 
-* feat: [sdmc](https://github.com/panedrone/sdmc) instead of go-sdm
 * feat: ported to React 18.2.0
 * feat: for sdm 1.321.2601 "mockable golang dao"
 * feat: [unit-tests](internal/sqlx/handlers) of Gin handlers for GORM, sqlx and No-ORM (thanks to "mockable golang dao") 
