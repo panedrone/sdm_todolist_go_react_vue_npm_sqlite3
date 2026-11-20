@@ -75,55 +75,105 @@ sudo docker compose up --build -d
 ```xml
 <sdm>
 
-    <dto-class name="Project" ref="projects"/>
+    <dto-class name="gorm-Project" ref="projects"/>
 
-    <dto-class name="ProjectLi" ref="projects">
-        <field type="int64$" column="p_tasks_count"/>
+    <dto-class name="gorm-ProjectLi" ref="projects">
+        <field type="int64${json-gorm}" column="p_tasks_count"/>
     </dto-class>
 
-    <dto-class name="Task" ref="tasks">
+    <dto-class name="gorm-Task" ref="tasks">
         <custom>
-            TId // PK
-            PId // FK ref. column -> Project
+            TID // PK
+            PID // FK ref. column -> Project
+            Project Project `gorm:"foreignKey:PId;references:PId"` // FK -> Project
         </custom>
     </dto-class>
 
+    <dto-class name="gorm-TaskLi" ref="tasks">
+        <field column="t_comments" type="-"/>
+    </dto-class>
+
     <dao-class name="ProjectsDao">
-        <crud dto="Project"/>
-        <query-dto-list method="ReadAll" dto="ProjectLi" ref="get_projects.sql"/>
+        <crud dto="gorm-Project"/>
+        <query-dto-list method="ReadAllRaw" dto="gorm-ProjectLi" ref="get_projects.sql"/>
     </dao-class>
 
     <dao-class name="TasksDao">
-        <crud table="tasks" dto="Task"/>
-        <query-dto-list method="ReadByProject(pId)" ref="get_project_tasks.sql" dto="TaskLi"/>
+        <crud dto="gorm-Task"/>
+        <query-dto-list method="RawProjectTasks(int64 p_id)" dto="gorm-TaskLi" ref="get_project_tasks.sql"/>
     </dao-class>
 
 </sdm>
 ```
 
+The full one: [internal/gorm/sdm/sdm.xml](internal/gorm/sdm/sdm.xml).
+
 # Generated code in action (example)
+
+From the GORM handlers, [internal/gorm/handlers](internal/gorm/handlers):
 
 ```go
 // Projects
-dbal.CreateProject(ctx, &m.Project{PName: req.PName})
+if err := dbal.CreateProject(ctx, &m.Project{PName: req.PName}); err != nil {
+    resp.Abort500(ctx, err)
+    return
+}
 
-all, err := dbal.ReadAll(ctx)
+all, err := dbal.ReadAllRaw(ctx)
+if err != nil {
+    resp.Abort500(ctx, err)
+    return
+}
 
 pr, err := dbal.ReadProject(ctx, uri.PId)
+if err != nil {
+    if errors.Is(err, gorm.ErrRecordNotFound) {
+        resp.Abort404NotFound(ctx, err)
+        return
+    }
+    resp.Abort500(ctx, err)
+    return
+}
 
-_, err := dbal.UpdateProject(ctx, pr)
+if _, err := dbal.UpdateProject(ctx, &m.Project{PID: uri.PId, PName: req.PName}); err != nil {
+    resp.Abort500(ctx, err)
+    return
+}
 
-_, err := dbal.DeleteProject(ctx, &m.Project{PID: uri.PId})
-
+if _, err := dbal.DeleteProject(ctx, &m.Project{PID: uri.PId}); err != nil {
+    resp.Abort500(ctx, err)
+    return
+}
 
 // Tasks
-dbal.CreateTask(ctx, &t)
+if err := dbal.CreateTask(ctx, &t); err != nil {
+    resp.Abort500(ctx, err)
+    return
+}
 
 task, err := dbal.ReadTask(ctx, uri.TId)
+if err != nil {
+    if errors.Is(err, gorm.ErrRecordNotFound) {
+        resp.Abort404NotFound(ctx, err)
+        return
+    }
+    resp.Abort500(ctx, err)
+    return
+}
 
-tasks, err := dbal.ReadProjectTasks(ctx, uri.PId)
+tasks, err := dbal.RawProjectTasks(ctx, uri.PId)
+if err != nil {
+    resp.Abort500(ctx, err)
+    return
+}
 
-_, err = dbal.UpdateTask(ctx, t)
+if _, err := dbal.UpdateTask(ctx, task); err != nil {
+    resp.Abort500(ctx, err)
+    return
+}
 
-_, err := dbal.DeleteTask(ctx, &models.Task{TID: uri.TId})
+if _, err := dbal.DeleteTask(ctx, &m.Task{TID: uri.TId}); err != nil {
+    resp.Abort500(ctx, err)
+    return
+}
 ```
